@@ -1,0 +1,18 @@
+{
+  "name": "본문 각인",
+  "short_name": "본문 각인",
+  "description": "영어 3·4단원 본문 암기 훈련: 본문 읽기, 빈칸, 문장 쓰기, 어법 문제, 틀린 단어장",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f5f1",
+  "theme_color": "#2747d6",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

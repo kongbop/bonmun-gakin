@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>본문 각인</title>
+<meta name="description" content="영어 3·4단원 본문 암기 훈련">
+<meta name="theme-color" content="#2747d6">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="본문 각인">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a single study sheet. Controls on top, the passage as a printed page,
+   blanks marked with highlighter, answers graded in green and red pen. */
+:root {
+  --paper: #f3f5f1;
+  --card: #ffffff;
+  --ink: #1c2433;
+  --muted: #5d6778;
+  --line: #d6dbe2;
+  --mark: #ffe066;
+  --accent: #2747d6;
+  --good: #1d7a4d;
+  --bad: #c8372d;
+  --font-ui: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-text: "Source Serif 4", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #141821;
+    --card: #1d2330;
+    --ink: #e8ebf1;
+    --muted: #9aa4b5;
+    --line: #333c4c;
+    --mark: #6e5d10;
+    --accent: #93a6ff;
+    --good: #62d19b;
+    --bad: #ff867c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #141821;
+  --card: #1d2330;
+  --ink: #e8ebf1;
+  --muted: #9aa4b5;
+  --line: #333c4c;
+  --mark: #6e5d10;
+  --accent: #93a6ff;
+  --good: #62d19b;
+  --bad: #ff867c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  text-wrap: balance;
+}
+header p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  font: inherit;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--card);
+  font-weight: 700;
+}
+.stage { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; }
+.stage .nm { font-size: 13px; }
+.pips { display: flex; gap: 3px; }
+.pips i {
+  width: 9px; height: 9px; border-radius: 2px;
+  border: 1px solid currentColor; opacity: .45;
+}
+.pips i.on { background: currentColor; opacity: 1; }
+.pips i.part { background: currentColor; }
+.pips i:nth-child(6) { border-radius: 50%; margin-left: 3px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+header h1 { font-size: 28px; letter-spacing: -.01em; }
+.passage.reading { line-height: 1.85; }
+.passage.withko .sent { display: block; margin: 0 0 14px; }
+.rko { display: block; font-family: var(--font-ui); font-size: 14px; line-height: 1.5; color: var(--muted); margin-top: 2px; }
+.passage.gram { line-height: 2.3; }
+.gq { display: inline-flex; gap: 4px; vertical-align: baseline; border-radius: 8px; padding: 1px 3px; }
+.gq button { font-family: var(--font-text); font-size: 16px; padding: 1px 8px; line-height: 1.5; }
+.gq button small { font-family: var(--font-ui); font-size: 11px; color: var(--muted); margin-right: 4px; }
+.gq.cur { background: var(--mark); }
+.gq.cur button { border-color: var(--accent); }
+.gq button:disabled { opacity: .55; }
+.gq .extra { margin-right: 6px; }
+.gbox { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; border-left: 4px solid var(--good); background: var(--paper); border-radius: 0 8px 8px 0; padding: 12px 14px; }
+.gbox.bad { border-left-color: var(--bad); }
+.gbox p { margin: 0; font-size: 15px; }
+.gbox b { font-family: var(--font-text); font-size: 16px; }
+.lvdesc { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+.hud {
+  display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center;
+  padding: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+  position: sticky; top: 8px; z-index: 2;
+}
+.hud b { font-weight: 700; }
+#wrong { color: var(--bad); }
+.hud .sp { flex: 1; }
+.hint {
+  flex-basis: 100%;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+  font-size: 15px;
+}
+.hint::before { content: "해석  "; font-size: 12px; font-weight: 700; color: var(--accent); }
+.sheet {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 22px 20px;
+}
+.sheet h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-text);
+  font-size: 19px;
+  font-weight: 600;
+}
+.passage {
+  font-family: var(--font-text);
+  font-size: 18px;
+  line-height: 2.15;
+  margin: 0;
+  max-width: 65ch;
+}
+.passage input {
+  font: inherit;
+  line-height: 1.3;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--line);
+  border-radius: 3px 3px 0 0;
+  padding: 0 3px;
+  text-align: center;
+  max-width: 100%;
+}
+.passage input:disabled { opacity: 1; }
+.passage input::placeholder { color: var(--muted); opacity: 1; }
+.passage input.cur { background: var(--mark); border-bottom-color: var(--accent); }
+.passage .ok { color: var(--good); font-weight: 600; }
+.passage .miss { color: var(--bad); font-weight: 600; text-decoration: underline wavy; text-underline-offset: 4px; }
+.passage .shown { color: var(--muted); border-bottom: 2px dotted var(--line); }
+.result {
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--good);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 16px 18px;
+}
+.result.fail { border-left-color: var(--bad); }
+.result h3 { margin: 0 0 4px; font-size: 17px; }
+.result p { margin: 0 0 10px; color: var(--muted); }
+.result .missed { font-family: var(--font-text); color: var(--bad); }
+.primary { background: var(--accent); border-color: var(--accent); color: var(--card); font-weight: 700; }
+@media (max-width: 520px) {
+  .hud { gap: 6px 12px; padding: 8px 10px; font-size: 13px; top: 4px; }
+  .hud .bestwrap, .hud .sp { display: none; }
+  .hud button { padding: 5px 9px; }
+  .hint { font-size: 14px; line-height: 1.45; }
+}
+@media (max-width: 420px) {
+  .passage { font-size: 17px; }
+  .sheet { padding: 18px 14px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button { transition: border-color .15s; }
+}
+.opts { margin-top: 10px; }
+.vocab { border-top: 1px solid var(--line); padding-top: 18px; }
+.vhead { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+.vhead h2 { margin: 0; font-size: 17px; }
+.vhead h2 span { color: var(--muted); font-weight: 500; font-size: 14px; }
+#vlist { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+#vlist li {
+  display: grid;
+  grid-template-columns: minmax(96px, 170px) 1fr auto;
+  gap: 6px 14px;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.vw { font-family: var(--font-text); font-size: 18px; font-weight: 600; overflow-wrap: anywhere; }
+.vm button, .vdone { padding: 4px 10px; font-size: 13px; }
+.vx { grid-column: 1 / -1; margin: 0; font-family: var(--font-text); font-size: 15px; line-height: 1.6; color: var(--muted); }
+.vx mark { background: var(--mark); color: var(--ink); border-radius: 3px; padding: 0 2px; }
+.vko { font-family: var(--font-ui); font-size: 13px; }
+@media (max-width: 520px) {
+  #vlist li { grid-template-columns: 1fr auto; }
+  .vm { grid-column: 1 / -1; grid-row: 2; }
+}
+button:disabled { opacity: .5; cursor: default; }
+button:disabled:hover { border-color: var(--line); }
+.note { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.note:empty, .passage:empty { display: none; }
+.sent[hidden] { display: none; }
+.pause { margin-top: 14px; }
+.writer { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+#winput, #wfeedback { display: flex; flex-direction: column; gap: 10px; }
+.writer[hidden], #winput[hidden], #wfeedback[hidden] { display: none; }
+.ko {
+  margin: 0;
+  font-size: 16px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--accent);
+  background: var(--paper);
+  border-radius: 0 8px 8px 0;
+}
+textarea {
+  font-family: var(--font-text);
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 100%;
+  resize: vertical;
+}
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mine { margin: 0; color: var(--muted); font-family: var(--font-text); font-size: 16px; }
+.mine b { font-family: var(--font-ui); font-size: 13px; color: var(--ink); }
+.extra { color: var(--bad); text-decoration: line-through; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">English Unit 3 · Unit 4</div>
+    <h1>본문 각인</h1>
+    <p>본문 읽기로 시작해 빈칸, 문장 쓰기, 어법 문제까지 단계별로 올라가요. 빈칸은 맞으면 바로 넘어가고, 틀린 답을 치고 스페이스나 엔터를 누르면 정답이 빨간색으로 표시돼요. 틀린 단어는 문단마다 모아 따로 복습하고, 맨 아래 단어장에서 뜻도 외울 수 있어요.</p>
+  </header>
+
+  <section>
+    <div class="label">단원</div>
+    <div class="row" id="units"></div>
+  </section>
+
+  <section>
+    <div class="label">문단 (네모 5칸은 레벨 1~5, 동그라미는 어법 문제. 진한 칸은 하나도 안 틀림, 연한 칸은 틀린 채로 완료)</div>
+    <div class="row" id="stages"></div>
+  </section>
+
+  <section>
+    <div class="label">레벨</div>
+    <div class="row" id="levels"></div>
+    <p class="lvdesc" id="lvdesc"></p>
+    <div class="row opts">
+      <button type="button" id="sentBtn" aria-pressed="false">한 문장씩 풀기</button>
+      <button type="button" id="reviewBtn">틀린 단어만 복습 (0개)</button>
+    </div>
+  </section>
+
+  <div class="hud" aria-live="polite">
+    <span>틀림 <b id="wrong">0</b></span>
+    <span><span id="proglabel">빈칸</span> <b id="prog">0 / 0</b></span>
+    <span>시간 <b id="time">0:00</b></span>
+    <span class="bestwrap">최고 기록 <b id="best">없음</b></span>
+    <span class="sp"></span>
+    <button type="button" id="hintBtn" aria-pressed="false">해석 힌트</button>
+    <button type="button" id="skip">정답 보기</button>
+    <p class="hint" id="hint" hidden></p>
+  </div>
+
+  <article class="sheet">
+    <h2 id="ptitle"></h2>
+    <p class="note" id="modeNote"></p>
+    <p class="passage" id="passage"></p>
+    <div class="row pause" id="readbox" hidden>
+      <button type="button" class="primary" id="readDone">다 읽었어요, 레벨 1로</button>
+    </div>
+    <div class="gbox" id="gbox" hidden>
+      <p id="gwhy"></p>
+      <div class="row"><button type="button" class="primary" id="gnext">다음 문제 (Enter)</button></div>
+    </div>
+    <div class="row pause" id="pause" hidden>
+      <button type="button" class="primary" id="nextSent">다음 문장 (Enter)</button>
+    </div>
+    <div class="writer" id="writer" hidden>
+      <p class="ko" id="wko"></p>
+      <div id="winput">
+        <textarea id="wtext" rows="3" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="영어 문장 쓰기" placeholder="위 해석에 맞는 영어 문장을 쓰세요"></textarea>
+        <div class="row"><button type="button" class="primary" id="wgrade">채점하기 (Enter)</button></div>
+      </div>
+      <div id="wfeedback" hidden>
+        <p class="mine" id="wmine"></p>
+        <div class="row">
+          <button type="button" class="primary" id="wnext">다음 문장 (Enter)</button>
+          <button type="button" id="wredo">이 문장 다시 쓰기</button>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <div class="result" id="result" hidden>
+    <h3 id="rtitle"></h3>
+    <p id="rtext"></p>
+    <p class="missed" id="rmissed"></p>
+    <div class="row">
+      <button type="button" class="primary" id="rnext"></button>
+      <button type="button" id="rreview">틀린 단어만 복습</button>
+      <button type="button" id="retry">다시 하기</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <button type="button" id="restart">이 문단 처음부터 (빈칸 새로 뽑기)</button>
+  </div>
+
+  <section class="vocab">
+    <div class="vhead">
+      <h2>틀린 단어장 <span id="vcount">0개</span></h2>
+      <button type="button" id="vhide" aria-pressed="false">뜻 가리고 외우기</button>
+    </div>
+    <p class="lvdesc" id="vempty">아직 틀린 단어가 없어요. 빈칸이나 문장 쓰기에서 틀린 단어가 뜻, 예문과 함께 여기에 모여요.</p>
+    <ul id="vlist"></ul>
+  </section>
+</div>
+
+<script>
+const UNITS = [
+  {
+    id: 'u3', name: '3단원', title: 'You’re Just Hangry!',
+    stages: [
+      { t: '도입', p: `Jenny was up late last night finishing an assignment after her part-time job. She had to skip breakfast this morning in a rush to catch the bus for school. By doing so, she made matters worse because she has to sit through and focus on her difficult science class. As the class drags on, her hunger builds, and she starts tapping her pencil on her desk and shooting angry glances at the clock. Her classmates start noticing her mood, and some are even laughing at her stomach noises. Embarrassed and angry, she snaps at her friends. Have you ever felt like Jenny?` },
+      { t: 'A New English Word', p: `After eating a delicious meal, we feel full, happy, and relaxed. That doesn’t occur when we are hungry; hunger causes discomfort and weakness and often sparks negative emotions. “You’re not you when you’re hungry,” was a famous candy bar commercial slogan a few years ago. What this slogan means is hunger can seriously change your mood and performance. The phenomenon of getting annoyed and irritated due to hunger is so common that the word “hangry,” a combination of hungry and angry, has become an official English word in many international dictionaries. So how does it work?` },
+      { t: 'Hunger and Psychology', p: `The word hangry caught the attention of psychologists, so researchers conducted a series of experiments with over two hundred U.S. college students. Participants were asked to either skip eating or eat a big meal right before the experiment. Their performance and behavior at varying levels of difficulty in tasks involving selective attention, mental rotation, writing, and frustration management were recorded and analyzed. The results showed that participants who skipped eating had poorer performance than those who ate beforehand. For example, they made more errors on the Stroop task, in which the participants were shown a color name printed in a different colored ink, and they were asked to say either the word or the color of the ink. Consequently, psychological studies seem to support that an empty stomach contributes to lower attention span and self-control.` },
+      { t: 'Hunger and Hormones', p: `Psychology is not the only field of science concerned with the relation between hunger and anger; physiologists know that hunger leads to changes in body reactions, too. When we eat bread, rice, or fruit, our digestive system breaks these foods down into glucose, the main fuel source for the cells in our body. It circulates in the blood and gets absorbed by cells for the energy required for their proper performance. But glucose levels fall when we are hungry, preventing cells from performing what they are supposed to do, an obvious threat to the proper functioning of the body. The human body responds to this threat by releasing cortisol, a hormone that helps our body cope with stressful situations. Elevated cortisol levels lead to an increase in heart rate and blood pressure along with many psychological effects including anxiety, irritation, and depression. These physiological reactions seem to be in line with psychological studies.` },
+      { t: 'Hunger and the Brain', p: `What is also affected by an empty stomach is the brain. Neurologists have found that high levels of cortisol cause the serotonin level in the brain to drop. Serotonin is a neurotransmitter that helps communication among neurons in different parts of the brain. Neurotransmitters play a crucial role in maintaining emotional balance and an overall sense of well-being. When serotonin levels are not balanced, normal functioning of mood regulation is disrupted, which can lead to feelings of sadness, increased irritability, and higher levels of anxiety. Neurologists have also come across interesting findings related to hunger and mental state by using brain imaging techniques to take pictures of brain activity. These images clearly show that, when people are hungry, areas related to threat and negative emotions increase in activity, while the activity patterns in areas responsible for higher cognitive skills like self-control and decision-making are greatly altered. Psychology, physiology, and neurology seem to agree that “You’re not you when you’re hungry.”` },
+      { t: 'You Are in Control', p: `Does this mean that everyone who is hungry gets irritated about something? No. Individuals vary in their genes and personality as well as in their lifestyle and experiences, so their physiological or neurological reactions to hunger can vary as well. In fact, scientists have observed that the behavior of many animals is closely linked to the availability of nourishment, too. For example, fruit flies get more aggressive when deprived of food, and schooling fish exhibit reduced group unity when hungry. Regardless, there is another interesting finding from the research of psychologists on hunger: People seem to be able to control their negative emotions, but only if they are able to recognize them. If you happen to find yourself angry, take a few deep breaths and ask yourself if you skipped lunch. What might be happening is you’re just hungry.` },
+      { t: 'Loneliness and Hunger ①', p: `While being hangry refers to the emotional feelings of anger caused by the physical needs of the body, a phenomenon called “lonely hunger” works the other way around, namely from the feelings of loneliness to the need for physical nourishment. That is, some people feel hungry when they feel lonely and isolated from others, often looking for a comfort in excessive “emotional eating.” Emotional eating may be a good way to relieve negative emotions in the short term, but it is not necessarily a good long-term solution due to health risks.` },
+      { t: 'Loneliness and Hunger ②', p: `Interestingly, the human brain’s response to loneliness is similar to its response to hunger, as brain imaging studies have shown that the same area in the brain is turned on when a person has these feelings. Studies also support the notion that loneliness serves as a signal similar to hunger, indicating a lack that needs to be addressed. Just as a lack of physical nourishment leads to psychological discomfort, a lack of social nourishment results in feelings of social hunger, a deficit that needs to be addressed.` }
+    ]
+  },
+  {
+    id: 'u4', name: '4단원', title: 'Sharpening Your Media Literacy Senses',
+    stages: [
+      { t: '도입', p: `In a place called Cottingley, England, in 1917, two young girls took some pictures of themselves near a stream at the bottom of a garden. The pictures showed the girls playing with fairies. When the famous author of Sherlock Holmes, Sir Arthur Conan Doyle, found out about them, he wrote an article claiming that the pictures were proof of supernatural phenomena. In today’s words, one could say that the pictures went “viral,” and Doyle’s endorsement gave the pictures “credibility.” For several years, the girls maintained that the pictures were genuine. Only after almost seventy years did the girls finally admit that the whole thing was made up. While this story is an interesting anecdote of fake news involving a famous author, it may be a cautionary tale demonstrating the importance of media literacy in the digital age.` },
+      { t: 'Single-Source Reading ①', p: `In the past, knowledge was passed down directly by the spoken word. The credibility of the speaker, not what was said, was the measure of trustworthiness. When the printing press introduced books as a means of knowledge transfer and written materials became more prevalent, readers had to develop new critical evaluation skills. However, they were often limited to a single source to evaluate the writer’s credibility, arguments, and logic. This type of analysis can be described as “vertical reading.”` },
+      { t: 'Single-Source Reading ②', p: `Vertical reading involves relying on the text to determine the reliability or validity of information. In school, students learn to examine an author’s credibility, their logic, and their references based on only their text. Having read a book, for example, a reader can review if the arguments presented in the text are supported by enough evidence, look at who the author or the publisher is, or check the references cited in the text. However, technology has changed the landscape in which people write and publish, making it necessary to change reading strategies.` },
+      { t: 'Single-Source Reading ③', p: `Since technology in 1917 was nowhere near as advanced as it is today, it’s understandable that a few pictures could convince a famous author as well as the general public of the existence of fairies. Does advanced technology prevent people from being fooled now? In fact, it may make it even easier to get tricked. Many people today fall victim to hoaxes or accept false claims because they don’t know how to verify information.` },
+      { t: 'Single-Source Reading ④', p: `This begs the question: How is it possible to verify such vast amounts of information? On the Internet, finding information is relatively easy, but verifying or validating it is not. In the past, there were publishing standards that authors had to meet. Today, the Internet removes the barriers to publishing for millions of people; however, it also makes it harder for readers to find reliable and valid information. In this environment, media literacy is more important than ever.` },
+      { t: 'Multiple-Source Reading ①', p: `Vertical reading is still useful, but new strategies must be adopted to navigate the vast online world. One of these strategies is called “lateral reading,” which involves verifying information while reading by checking as many sources as you can. This is useful because only one source is not enough. Checking information from multiple sources with various types of content, such as text, images, and videos, is helpful to verify something you have read and gain insight.` },
+      { t: 'Multiple-Source Reading ②', p: `For example, suppose a student reads an article on a popular online news site about the health of a population of people. Having come across some statistics about the number of people who are hospitalized due to poor diet, she can employ the lateral reading strategy by simply opening up another tab in her browser and accessing different sources to verify the numbers. In fact, she can open up as many new tabs as she wants to verify any type of information being presented, such as statistics in charts and tables, or general assertions. She can look up information from other popular news sites or go directly to a scientific journal article to read from the primary source of information.` },
+      { t: 'Multiple-Source Reading ③', p: `Readers employing digital lateral reading can take advantage of the volume of information on the Internet to check the credibility of an author’s claims. They can utilize Internet browser tools that help review many sites simultaneously. Many people and companies currently use this reading strategy because it allows them to more easily cross-check data, distinguish opinions from facts, and evaluate claims efficiently.` },
+      { t: 'Multiple-Source Reading ④', p: `As a way to maintain credibility, some companies hire “fact-checkers” to evaluate their writers’ claims before publishing anything. These fact-checkers use lateral reading as a quick means to survey what has already been written. For example, imagine a news agency that wants to publish a story on its website about a merger between two corporations. Fact-checkers will cross-check information from a variety of sources to ensure that the facts are accurate. In fact, in recent research surveys, having utilized this strategy, participants were found to have a broader understanding of any kind of information than participants who had used less optimal strategies like vertical reading.` },
+      { t: 'Multiple-Source Reading ⑤', p: `Vertical reading is not a perfect strategy and neither is lateral reading, but lateral reading takes greater advantage of modern technology than vertical reading. To fully appreciate this strategy, a reader in the digital world makes evaluating all forms of information a habit. No matter how neutral an author or publication claims to be, the burden of evaluation falls upon the reader to survey as much information as possible to determine the credibility of the data or the claims. We need to understand that the world, and therefore information itself, is constantly evolving: information does not remain still, so neither should the reader. For this reason, lateral reading is a continuous, repetitive process. Instead of approaching media from the perspective of a mere consumer of information, readers must learn to actively and dynamically engage with it while trying to make sense of it.` }
+    ]
+  }
+];
+
+// 문단별 한국어 해석. 영어 문장 순서와 1:1로 맞춘다.
+const KO = {
+  'u3-0': [
+    'Jenny는 어젯밤 아르바이트를 마친 뒤 과제를 끝내느라 늦게까지 깨어 있었다.',
+    '그녀는 오늘 아침 학교 가는 버스를 타려고 서두르느라 아침을 걸러야 했다.',
+    '그렇게 해서 상황은 더 나빠졌는데, 어려운 과학 수업을 끝까지 앉아서 집중해야 하기 때문이다.',
+    '수업이 지루하게 이어지면서 배고픔은 커지고, 그녀는 책상에 연필을 톡톡 두드리며 시계를 화난 눈길로 쏘아보기 시작한다.',
+    '반 친구들이 그녀의 기분을 알아차리기 시작하고, 몇몇은 그녀의 배에서 나는 소리에 웃기까지 한다.',
+    '창피하고 화가 난 그녀는 친구들에게 쏘아붙인다.',
+    '여러분도 Jenny처럼 느껴 본 적이 있는가?'
+  ],
+  'u3-1': [
+    '맛있는 식사를 하고 나면 우리는 배부르고, 행복하고, 편안해진다.',
+    '배가 고플 때는 그렇지 않다. 배고픔은 불편함과 무기력을 일으키고 종종 부정적인 감정을 불러일으킨다.',
+    '“배고플 때 당신은 당신이 아니다.”는 몇 년 전 유명했던 캔디 바 광고 문구였다.',
+    '이 문구가 뜻하는 바는 배고픔이 기분과 수행 능력을 크게 바꿀 수 있다는 것이다.',
+    '배고픔 때문에 짜증이 나고 화가 나는 현상은 아주 흔해서, hungry(배고픈)와 angry(화난)를 합친 단어 ‘hangry’가 여러 국제적인 사전에 공식 영어 단어로 실리게 되었다.',
+    '그렇다면 이것은 어떻게 작동하는 걸까?'
+  ],
+  'u3-2': [
+    'hangry라는 단어가 심리학자들의 관심을 끌었고, 그래서 연구자들은 200명이 넘는 미국 대학생을 대상으로 일련의 실험을 했다.',
+    '참가자들은 실험 직전에 식사를 거르거나 푸짐하게 식사를 하도록 요청받았다.',
+    '선택적 주의, 심적 회전, 글쓰기, 좌절감 관리가 포함된 과제에서 난이도를 달리했을 때의 수행과 행동이 기록되고 분석되었다.',
+    '결과는 식사를 거른 참가자들이 미리 식사한 참가자들보다 수행이 더 나빴음을 보여 주었다.',
+    '예를 들어, 그들은 스트룹 과제에서 실수를 더 많이 했는데, 이 과제에서 참가자들은 다른 색 잉크로 인쇄된 색 이름을 보고 그 단어나 잉크의 색 중 하나를 말해야 했다.',
+    '결과적으로, 심리학 연구들은 빈속이 주의 지속 시간과 자제력을 떨어뜨리는 데 영향을 준다는 점을 뒷받침하는 것으로 보인다.'
+  ],
+  'u3-3': [
+    '배고픔과 분노의 관계에 관심을 두는 과학 분야가 심리학만은 아니다. 생리학자들도 배고픔이 신체 반응의 변화로 이어진다는 것을 알고 있다.',
+    '우리가 빵, 밥, 과일을 먹으면 소화 기관은 이 음식들을 우리 몸의 세포가 쓰는 주된 연료인 포도당으로 분해한다.',
+    '포도당은 혈액 속을 돌다가, 세포가 제 기능을 하는 데 필요한 에너지로 쓰이도록 세포에 흡수된다.',
+    '하지만 배가 고프면 포도당 수치가 떨어져 세포가 해야 할 일을 하지 못하게 되는데, 이는 신체의 정상적인 기능에 대한 명백한 위협이다.',
+    '인체는 이 위협에 대응해, 스트레스 상황에 대처하도록 돕는 호르몬인 코르티솔을 분비한다.',
+    '코르티솔 수치가 높아지면 심박수와 혈압이 올라가고, 불안, 짜증, 우울을 비롯한 여러 심리적 영향이 함께 나타난다.',
+    '이러한 생리적 반응은 심리학 연구 결과와 일치하는 것으로 보인다.'
+  ],
+  'u3-4': [
+    '빈속의 영향을 받는 또 하나는 뇌이다.',
+    '신경학자들은 높은 코르티솔 수치가 뇌의 세로토닌 수치를 떨어뜨린다는 것을 발견했다.',
+    '세로토닌은 뇌의 여러 부위에 있는 뉴런들 사이의 소통을 돕는 신경 전달 물질이다.',
+    '신경 전달 물질은 정서적 균형과 전반적인 행복감을 유지하는 데 매우 중요한 역할을 한다.',
+    '세로토닌 수치의 균형이 깨지면 기분 조절의 정상적인 기능이 방해를 받아, 슬픔, 짜증 증가, 더 높은 불안으로 이어질 수 있다.',
+    '신경학자들은 또한 뇌 활동을 촬영하는 뇌 영상 기법을 이용해 배고픔과 정신 상태에 관한 흥미로운 사실들을 발견했다.',
+    '이 영상들은 사람이 배고플 때 위협과 부정적 감정에 관련된 영역의 활동은 늘어나는 반면, 자제력이나 의사 결정 같은 고등 인지 기능을 맡는 영역의 활동 양상은 크게 달라진다는 것을 분명히 보여 준다.',
+    '심리학, 생리학, 신경학 모두 “배고플 때 당신은 당신이 아니다.”라는 말에 동의하는 것으로 보인다.'
+  ],
+  'u3-5': [
+    '이것은 배고픈 사람이라면 누구나 무언가에 짜증을 낸다는 뜻일까?',
+    '아니다.',
+    '사람마다 유전자와 성격은 물론 생활 방식과 경험도 다르기 때문에, 배고픔에 대한 생리적·신경학적 반응도 다를 수 있다.',
+    '사실 과학자들은 많은 동물의 행동 역시 먹이를 얼마나 구할 수 있는지와 밀접하게 연결되어 있음을 관찰했다.',
+    '예를 들어, 초파리는 먹이를 빼앗기면 더 공격적이 되고, 떼 지어 다니는 물고기는 배가 고프면 무리의 결속이 약해진다.',
+    '그렇더라도 심리학자들의 배고픔 연구에는 흥미로운 발견이 하나 더 있다. 사람은 부정적인 감정을 조절할 수 있는 것으로 보이는데, 다만 그 감정을 알아차릴 수 있을 때에만 그렇다.',
+    '혹시 자신이 화가 나 있다는 걸 알게 되면, 심호흡을 몇 번 하고 점심을 걸렀는지 스스로에게 물어보라.',
+    '어쩌면 그저 배가 고픈 것일 수도 있다.'
+  ],
+  'u3-6': [
+    'hangry가 몸의 신체적 필요 때문에 생기는 분노의 감정을 가리킨다면, ‘외로운 배고픔’이라는 현상은 그 반대로, 즉 외로움의 감정에서 신체적 영양에 대한 필요로 이어진다.',
+    '다시 말해, 어떤 사람들은 외롭고 다른 사람들로부터 고립되었다고 느낄 때 배고픔을 느끼고, 흔히 지나친 ‘감정적 섭식’에서 위안을 찾는다.',
+    '감정적 섭식은 단기적으로는 부정적인 감정을 덜어 주는 좋은 방법일 수 있지만, 건강상의 위험 때문에 장기적으로 꼭 좋은 해결책은 아니다.'
+  ],
+  'u3-7': [
+    '흥미롭게도 외로움에 대한 인간 뇌의 반응은 배고픔에 대한 반응과 비슷한데, 뇌 영상 연구에 따르면 사람이 이런 감정을 느낄 때 뇌의 같은 영역이 활성화되기 때문이다.',
+    '연구들은 또한 외로움이 배고픔과 비슷한 신호로 작용해, 채워져야 할 결핍이 있음을 알려 준다는 생각을 뒷받침한다.',
+    '신체적 영양의 결핍이 심리적 불편함으로 이어지는 것처럼, 사회적 영양의 결핍은 사회적 배고픔, 곧 채워져야 할 결핍의 감정을 낳는다.'
+  ],
+  'u4-0': [
+    '1917년 영국의 코팅리라는 곳에서 두 어린 소녀가 정원 아래쪽 개울가에서 자신들의 사진을 몇 장 찍었다.',
+    '사진에는 소녀들이 요정들과 놀고 있는 모습이 담겨 있었다.',
+    '‘셜록 홈스’의 유명한 작가 아서 코난 도일 경은 이 사진에 대해 알게 되자, 그 사진이 초자연적 현상의 증거라고 주장하는 글을 썼다.',
+    '요즘 말로 하면 그 사진은 ‘입소문을 타고 퍼졌고’, 도일의 지지가 사진에 ‘신뢰성’을 더해 주었다고 할 수 있다.',
+    '여러 해 동안 소녀들은 사진이 진짜라고 주장했다.',
+    '거의 70년이 지나서야 소녀들은 마침내 모든 것이 꾸며 낸 일이었다고 인정했다.',
+    '이 이야기는 유명 작가가 얽힌 가짜 뉴스의 흥미로운 일화이면서, 디지털 시대에 미디어 리터러시가 얼마나 중요한지 보여 주는 경고성 이야기일 수도 있다.'
+  ],
+  'u4-1': [
+    '과거에 지식은 말을 통해 직접 전해졌다.',
+    '말의 내용이 아니라 말하는 사람의 신뢰성이 믿을 만한지를 가늠하는 기준이었다.',
+    '인쇄기가 책을 지식 전달의 수단으로 들여오고 글로 된 자료가 더 널리 퍼지자, 독자들은 새로운 비판적 평가 능력을 길러야 했다.',
+    '하지만 그들은 글쓴이의 신뢰성, 주장, 논리를 평가할 때 대개 하나의 자료에만 의존할 수밖에 없었다.',
+    '이런 방식의 분석을 ‘수직적 읽기’라고 할 수 있다.'
+  ],
+  'u4-2': [
+    '수직적 읽기는 정보의 신뢰도나 타당성을 판단할 때 그 글 자체에 의존하는 것이다.',
+    '학교에서 학생들은 오직 글만을 바탕으로 글쓴이의 신뢰성, 논리, 참고 자료를 살펴보는 법을 배운다.',
+    '예를 들어 책을 읽고 난 독자는 글에 제시된 주장이 충분한 근거로 뒷받침되는지 검토하거나, 저자나 출판사가 누구인지 살펴보거나, 글에 인용된 참고 문헌을 확인할 수 있다.',
+    '하지만 기술이 사람들이 글을 쓰고 펴내는 환경을 바꾸어 놓았고, 그에 따라 읽기 전략도 바꿀 필요가 생겼다.'
+  ],
+  'u4-3': [
+    '1917년의 기술은 오늘날만큼 발달하지 않았으므로, 사진 몇 장이 일반 대중은 물론 유명 작가에게까지 요정의 존재를 믿게 할 수 있었던 것도 이해할 만하다.',
+    '그렇다면 발달한 기술은 오늘날 사람들이 속는 것을 막아 줄까?',
+    '사실은 오히려 속기가 더 쉬워졌을지도 모른다.',
+    '오늘날 많은 사람이 정보를 검증하는 방법을 몰라서 거짓 정보에 속아 넘어가거나 거짓 주장을 받아들인다.'
+  ],
+  'u4-4': [
+    '여기서 이런 의문이 생긴다. 그렇게 방대한 양의 정보를 어떻게 검증할 수 있을까?',
+    '인터넷에서 정보를 찾기는 비교적 쉽지만, 그것을 검증하거나 확인하기는 쉽지 않다.',
+    '과거에는 저자가 충족해야 하는 출판 기준이 있었다.',
+    '오늘날 인터넷은 수많은 사람에게 출판의 장벽을 없애 주었다. 하지만 그만큼 독자가 믿을 만하고 타당한 정보를 찾기는 더 어려워졌다.',
+    '이런 환경에서 미디어 리터러시는 그 어느 때보다 중요하다.'
+  ],
+  'u4-5': [
+    '수직적 읽기는 여전히 유용하지만, 방대한 온라인 세계를 헤쳐 나가려면 새로운 전략을 받아들여야 한다.',
+    '그런 전략 중 하나가 ‘수평적 읽기’인데, 글을 읽는 동안 가능한 한 많은 자료를 확인해 정보를 검증하는 것이다.',
+    '하나의 자료만으로는 충분하지 않기 때문에 이 방법이 유용하다.',
+    '글, 이미지, 영상 등 다양한 유형의 콘텐츠가 담긴 여러 자료에서 정보를 확인하면, 읽은 내용을 검증하고 통찰을 얻는 데 도움이 된다.'
+  ],
+  'u4-6': [
+    '예를 들어, 한 학생이 인기 있는 온라인 뉴스 사이트에서 어떤 집단 사람들의 건강에 관한 기사를 읽는다고 해 보자.',
+    '나쁜 식습관 때문에 입원하는 사람 수에 관한 통계를 접했다면, 그녀는 브라우저에서 새 탭을 하나 열고 다른 자료들을 찾아 그 수치를 검증하는 것만으로 수평적 읽기 전략을 쓸 수 있다.',
+    '사실 그녀는 도표와 표에 담긴 통계든 일반적인 주장이든, 제시된 어떤 유형의 정보라도 검증하기 위해 원하는 만큼 새 탭을 열 수 있다.',
+    '다른 인기 뉴스 사이트에서 정보를 찾아볼 수도 있고, 과학 학술지 논문으로 바로 가서 정보의 1차 출처를 읽을 수도 있다.'
+  ],
+  'u4-7': [
+    '디지털 수평적 읽기를 하는 독자는 인터넷의 방대한 정보량을 활용해 글쓴이의 주장이 믿을 만한지 확인할 수 있다.',
+    '그들은 여러 사이트를 동시에 살펴보도록 도와주는 인터넷 브라우저 도구를 활용할 수 있다.',
+    '현재 많은 사람과 기업이 이 읽기 전략을 쓰는데, 자료를 더 쉽게 교차 확인하고, 의견과 사실을 구별하고, 주장을 효율적으로 평가할 수 있기 때문이다.'
+  ],
+  'u4-8': [
+    '신뢰성을 유지하는 방법으로, 일부 기업은 글을 내보내기 전에 필자들의 주장을 평가할 ‘팩트 체커’를 고용한다.',
+    '이 팩트 체커들은 이미 나와 있는 글들을 빠르게 훑어보는 수단으로 수평적 읽기를 쓴다.',
+    '예를 들어, 두 기업의 합병에 관한 기사를 자사 웹사이트에 실으려는 통신사를 떠올려 보자.',
+    '팩트 체커들은 사실 관계가 정확한지 확실히 하기 위해 다양한 자료의 정보를 교차 확인할 것이다.',
+    '실제로 최근의 연구 조사에서, 이 전략을 쓴 참가자들은 수직적 읽기처럼 덜 효과적인 전략을 쓴 참가자들보다 어떤 종류의 정보든 더 폭넓게 이해하는 것으로 나타났다.'
+  ],
+  'u4-9': [
+    '수직적 읽기도 수평적 읽기도 완벽한 전략은 아니지만, 수평적 읽기가 수직적 읽기보다 현대 기술을 더 잘 활용한다.',
+    '이 전략의 진가를 제대로 살리려면, 디지털 세계의 독자는 모든 형태의 정보를 평가하는 일을 습관으로 삼아야 한다.',
+    '저자나 출판물이 아무리 중립적이라고 주장하더라도, 자료나 주장의 신뢰성을 판단하기 위해 가능한 한 많은 정보를 살펴볼 평가의 책임은 독자에게 있다.',
+    '우리는 세상이, 따라서 정보 자체도 끊임없이 변한다는 점을 이해해야 한다. 정보는 가만히 머물러 있지 않으니, 독자도 그래서는 안 된다.',
+    '이런 이유로 수평적 읽기는 계속 반복되는 과정이다.',
+    '독자는 정보의 단순한 소비자의 관점에서 미디어를 대하는 대신, 그 의미를 이해하려 애쓰면서 능동적이고 역동적으로 미디어와 관계 맺는 법을 배워야 한다.'
+  ]
+};
+
+// 단어 뜻. 키는 소문자·기호 제거 형태, 뜻은 이 본문 문맥 기준.
+const GLOSS = {};
+`
+jenny=Jenny (사람 이름)
+late=늦게까지
+last=지난
+night=밤
+finishing=끝내느라, 끝내면서
+assignment=과제
+after=~한 뒤에
+parttime=시간제의, 아르바이트의
+job=일, 직장
+skip=거르다, 건너뛰다
+breakfast=아침 식사
+morning=아침
+rush=서두름 (in a rush: 서둘러서)
+catch=(버스 등을) 잡아타다
+bus=버스
+school=학교
+doing=하는 것 (by doing so: 그렇게 함으로써)
+so=그래서; 그렇게
+made=만들었다 (make의 과거·과거분사)
+matters=상황, 사정
+worse=더 나쁜
+because=~ 때문에
+sit=앉다 (sit through: 끝까지 앉아 있다)
+through=~을 끝까지, ~을 통과하여
+focus=집중하다
+difficult=어려운
+science=과학
+class=수업
+as=~하면서, ~할 때; ~로서; ~만큼
+drags=(시간이) 지루하게 이어지다
+hunger=배고픔
+builds=점점 커지다
+starts=시작하다
+tapping=톡톡 두드리는 것
+pencil=연필
+desk=책상
+shooting=(눈길을) 쏘아 보내는 것
+angry=화난
+glances=흘끗 보는 눈길
+clock=시계
+classmates=반 친구들
+start=시작하다
+noticing=알아차리는 것
+mood=기분
+laughing=웃는
+stomach=배, 위
+noises=소리, 소음
+embarrassed=창피한, 당황한
+snaps=쏘아붙이다
+friends=친구들
+ever=(경험) 한 번이라도
+felt=느꼈다 (feel의 과거·과거분사)
+eating=먹는 것, 식사
+delicious=맛있는
+meal=식사
+feel=느끼다
+full=배부른
+happy=행복한
+relaxed=편안한, 느긋한
+that=~라는 것; (관계대명사) ~하는; 그것
+doesnt=~하지 않다 (does not)
+occur=일어나다, 발생하다
+hungry=배고픈
+causes=일으키다, 유발하다
+discomfort=불편함
+weakness=무기력, 약함
+often=종종
+sparks=불러일으키다, 촉발하다
+negative=부정적인
+emotions=감정
+youre=당신은 ~이다 (you are)
+famous=유명한
+candy=사탕, 캔디
+bar=막대 모양의 것 (candy bar: 캔디 바)
+commercial=광고(의)
+slogan=광고 문구, 구호
+years=해, 년
+ago=~ 전에
+what=~하는 것 (선행사를 포함한 관계대명사); 무엇
+means=의미하다; (명사) 수단
+seriously=심각하게, 크게
+change=바꾸다; 변화
+performance=수행 (능력), 성과
+phenomenon=현상
+getting=~하게 되는 것 (get + 형용사)
+annoyed=짜증이 난
+irritated=화가 난, 짜증이 난
+due=(due to) ~ 때문에
+common=흔한
+word=단어, 말
+hangry=배고파서 화가 난 (hungry + angry)
+combination=결합, 조합
+become=~이 되다 (과거분사도 become)
+official=공식적인
+english=영어(의)
+international=국제적인
+dictionaries=사전들
+work=작동하다; 일하다
+caught=(관심을) 끌었다 (catch의 과거·과거분사)
+attention=관심, 주의
+psychologists=심리학자들
+researchers=연구자들
+conducted=(실험을) 수행했다
+series=일련, 연속 (a series of: 일련의)
+experiments=실험들
+hundred=백(100)
+us=미국 (U.S.)
+college=대학
+students=학생들
+participants=참가자들
+asked=요청받은; 물었다
+either=(either A or B) A 또는 B 둘 중 하나
+eat=먹다
+big=큰, 푸짐한
+right=바로 (right before: 직전에)
+before=~ 전에
+experiment=실험
+behavior=행동
+varying=다양한, 서로 다른
+levels=수준, 수치
+difficulty=난이도, 어려움
+tasks=과제들
+involving=~을 포함하는, ~이 얽힌
+selective=선택적인
+mental=정신의, 심적인
+rotation=회전
+writing=글쓰기
+frustration=좌절감
+management=관리
+recorded=기록된
+analyzed=분석된
+results=결과; (result in) ~을 낳다
+showed=보여 주었다
+who=(관계대명사) ~하는 사람; 누구
+skipped=걸렀다, 건너뛰었다
+poorer=더 나쁜, 더 못한
+than=~보다
+ate=먹었다 (eat의 과거)
+beforehand=미리, 사전에
+example=예 (for example: 예를 들어)
+errors=실수, 오류
+stroop=스트룹 (Stroop task: 스트룹 과제)
+task=과제
+which=(관계대명사) 그것은, ~하는
+shown=보여진 (show의 과거분사)
+color=색
+name=이름
+printed=인쇄된
+different=다른
+colored=색깔이 있는
+ink=잉크
+say=말하다
+consequently=결과적으로, 따라서
+psychological=심리(학)적인
+studies=연구들
+seem=~인 것 같다, ~으로 보이다
+support=뒷받침하다, 지지하다
+empty=비어 있는
+contributes=(contribute to) ~의 원인이 되다, ~에 기여하다
+lower=더 낮은
+span=지속 시간, 범위 (attention span: 주의 지속 시간)
+selfcontrol=자제력
+psychology=심리학
+only=유일한; 오직, ~만
+field=분야
+concerned=(concerned with) ~에 관심을 두는, ~와 관련된
+relation=관계
+between=~ 사이에
+anger=분노, 화
+physiologists=생리학자들
+know=알다
+leads=(lead to) ~로 이어지다
+changes=변화들
+body=몸, 신체
+reactions=반응들
+bread=빵
+rice=쌀, 밥
+fruit=과일 (fruit fly: 초파리)
+digestive=소화의
+system=계통, 기관, 체계
+breaks=(break down) 분해하다
+foods=음식들
+down=아래로 (break down: 분해하다 / pass down: 전해 주다)
+glucose=포도당
+main=주된
+fuel=연료
+source=원천, 출처, 자료
+cells=세포들
+circulates=순환하다, 돌다
+blood=혈액, 피
+gets=~하게 되다 (get + 과거분사/형용사)
+absorbed=흡수된
+energy=에너지
+required=필요한, 요구되는
+proper=적절한, 제대로 된
+fall=떨어지다; (fall victim to) ~에 속아 넘어가다
+preventing=막으면서 (prevent A from -ing: A가 ~하지 못하게 하다)
+performing=수행하는 것
+supposed=(be supposed to) ~하기로 되어 있는, ~해야 하는
+obvious=명백한
+threat=위협
+functioning=기능, 작동
+human=인간(의)
+responds=(respond to) ~에 반응하다, 대응하다
+releasing=분비하는 것, 방출하는 것
+cortisol=코르티솔 (스트레스 호르몬)
+hormone=호르몬
+helps=돕다
+cope=(cope with) ~에 대처하다
+stressful=스트레스가 많은
+situations=상황들
+elevated=높아진, 상승한
+lead=(lead to) ~로 이어지다
+increase=증가; 증가하다
+heart=심장 (heart rate: 심박수)
+rate=비율, 속도
+pressure=압력 (blood pressure: 혈압)
+along=(along with) ~와 함께
+effects=영향, 효과
+including=~을 포함하여
+anxiety=불안
+irritation=짜증
+depression=우울(증)
+physiological=생리(학)적인
+line=선 (in line with: ~와 일치하는)
+affected=영향을 받은
+brain=뇌
+neurologists=신경학자들
+found=발견했다 (find의 과거·과거분사)
+high=높은
+cause=~하게 하다, 야기하다
+serotonin=세로토닌 (신경 전달 물질)
+level=수준, 수치
+drop=떨어지다
+neurotransmitter=신경 전달 물질
+communication=소통, 의사 전달
+among=~ 사이에 (셋 이상)
+neurons=뉴런, 신경 세포
+parts=부분, 부위
+neurotransmitters=신경 전달 물질들
+play=(play a role) 역할을 하다
+crucial=매우 중요한, 결정적인
+role=역할
+maintaining=유지하는 것
+emotional=정서적인, 감정적인
+balance=균형
+overall=전반적인
+sense=감각, 느낌 (make sense of: ~을 이해하다)
+wellbeing=행복, 안녕
+balanced=균형 잡힌
+normal=정상적인
+regulation=조절
+disrupted=방해받은, 교란된
+feelings=감정, 느낌
+sadness=슬픔
+increased=증가한
+irritability=짜증을 잘 냄, 과민함
+higher=더 높은
+come=(come across) 우연히 발견하다, 접하다
+across=가로질러 (come across: 우연히 발견하다, 접하다)
+interesting=흥미로운
+findings=연구 결과, 발견
+related=(related to) ~와 관련된
+state=상태
+using=사용함으로써, 사용하는 것
+imaging=영상(화), 촬영
+techniques=기법, 기술
+take=(take pictures) 사진을 찍다; (take advantage of) 이용하다
+pictures=사진들
+activity=활동
+images=영상, 이미지
+clearly=분명히
+show=보여 주다
+people=사람들
+areas=영역, 부위
+while=~인 반면에; ~하는 동안
+patterns=양상, 패턴
+responsible=(responsible for) ~을 담당하는, 책임지는
+cognitive=인지의
+skills=능력, 기술
+decisionmaking=의사 결정
+greatly=크게, 대단히
+altered=바뀐, 달라진
+physiology=생리학
+neurology=신경학
+agree=동의하다
+mean=의미하다
+everyone=모든 사람
+something=무언가
+individuals=개인들
+vary=다르다, 다양하다
+genes=유전자
+personality=성격
+well=(as well as) ~뿐만 아니라; (as well) 또한
+lifestyle=생활 방식
+experiences=경험들
+neurological=신경(학)적인
+fact=사실 (in fact: 사실은)
+scientists=과학자들
+observed=관찰했다
+animals=동물들
+closely=밀접하게
+linked=(linked to) ~와 연결된
+availability=구할 수 있는 정도, 이용 가능성
+nourishment=영양(분), 먹이
+flies=파리 (fruit flies: 초파리)
+get=~하게 되다
+aggressive=공격적인
+deprived=(deprived of) ~을 빼앗긴
+food=먹이, 음식
+schooling=(물고기가) 떼 지어 다니는
+fish=물고기
+exhibit=보이다, 나타내다
+reduced=줄어든, 약해진
+group=집단, 무리
+unity=결속, 단합
+regardless=그럼에도 불구하고, 어쨌든
+another=또 하나의
+finding=발견, 연구 결과
+research=연구
+able=(be able to) ~할 수 있는
+control=조절하다, 통제하다; 통제
+if=만약 ~라면; ~인지
+recognize=알아차리다, 인식하다
+happen=(happen to) 우연히 ~하다
+find=발견하다, 알게 되다
+yourself=너 자신
+deep=깊은
+breaths=숨 (take a deep breath: 심호흡하다)
+ask=묻다
+lunch=점심
+might=~일지도 모른다
+happening=일어나고 있는
+just=그저, 단지; (just as) ~와 꼭 마찬가지로
+being=~인 것 (be의 동명사·현재분사)
+refers=(refer to) ~을 가리키다
+caused=(caused by) ~에 의해 생긴
+physical=신체적인
+needs=필요, 욕구; ~할 필요가 있다
+called=~라고 불리는
+lonely=외로운
+works=작동하다
+other=다른 (the other way around: 반대로)
+way=방식, 방향, 방법
+around=(the other way around) 반대로
+namely=즉, 다시 말해
+loneliness=외로움
+need=필요; ~할 필요가 있다
+isolated=고립된
+others=다른 사람들
+looking=(look for) ~을 찾는
+comfort=위안
+excessive=지나친, 과도한
+good=좋은
+relieve=덜어 주다, 완화하다
+short=짧은 (in the short term: 단기적으로)
+term=기간
+necessarily=(not necessarily) 반드시 ~인 것은 아닌
+longterm=장기적인
+solution=해결책
+health=건강
+risks=위험
+interestingly=흥미롭게도
+brains=뇌의 (brain's)
+response=반응
+similar=(similar to) ~와 비슷한
+same=같은
+area=영역, 부위
+turned=(turned on) 활성화된, 켜진
+person=사람
+notion=생각, 개념
+serves=(serve as) ~의 역할을 하다
+signal=신호
+indicating=나타내는, 가리키는
+lack=결핍, 부족
+addressed=다루어진, 해결된
+social=사회적인
+deficit=결핍, 부족
+place=장소, 곳
+cottingley=코팅리 (영국의 지명)
+england=영국, 잉글랜드
+1917=1917년
+young=어린
+girls=소녀들
+took=(사진을) 찍었다 (take의 과거)
+themselves=그들 자신
+near=~ 근처에
+stream=개울
+bottom=맨 아래, 끝
+garden=정원
+playing=놀고 있는
+fairies=요정들
+author=작가, 저자
+sherlock=셜록 (Sherlock Holmes: 셜록 홈스)
+holmes=홈스 (Sherlock Holmes: 셜록 홈스)
+sir=경 (작위를 받은 사람의 호칭)
+arthur=아서 (사람 이름)
+conan=코난 (사람 이름)
+doyle=도일 (사람 이름)
+wrote=썼다 (write의 과거)
+article=글, 기사
+claiming=주장하는
+proof=증거
+supernatural=초자연적인
+phenomena=현상들 (phenomenon의 복수)
+todays=오늘날의 (today's)
+words=말, 단어
+could=~할 수 있었다; ~할 수도 있다
+went=(went viral) 입소문을 타고 퍼졌다 (go의 과거)
+viral=입소문을 타고 빠르게 퍼지는
+doyles=도일의 (Doyle's)
+endorsement=지지, 보증
+gave=주었다 (give의 과거)
+credibility=신뢰성
+several=여러, 몇몇의
+maintained=주장했다; 유지했다
+genuine=진짜의
+almost=거의
+seventy=70
+did=(도치) Only after ~ did + 주어 + 동사원형: ~하고 나서야 …했다
+finally=마침내
+admit=인정하다
+whole=전체의
+thing=것, 일
+story=이야기, 기사
+anecdote=일화
+fake=가짜의
+news=뉴스
+cautionary=경고의 (cautionary tale: 경고성 이야기)
+tale=이야기
+demonstrating=보여 주는
+importance=중요성
+media=미디어, 매체
+literacy=리터러시, 읽고 이해하는 능력
+digital=디지털의
+age=시대
+past=과거
+knowledge=지식
+passed=(passed down) 전해진
+directly=직접
+spoken=말로 하는 (speak의 과거분사)
+speaker=말하는 사람, 화자
+said=말해진 (say의 과거분사)
+measure=척도, 기준
+trustworthiness=신뢰할 만함, 신뢰도
+printing=인쇄 (printing press: 인쇄기)
+press=인쇄기; 언론
+introduced=들여왔다, 도입했다
+books=책들
+transfer=전달, 이동
+written=글로 쓰인 (write의 과거분사)
+materials=자료들
+became=~이 되었다 (become의 과거)
+prevalent=널리 퍼진
+readers=독자들
+develop=기르다, 발달시키다
+new=새로운
+critical=비판적인
+evaluation=평가
+however=하지만
+limited=(limited to) ~로 제한된
+single=단 하나의
+evaluate=평가하다
+writers=글쓴이의, 필자들의 (writer's / writers')
+arguments=주장, 논거
+logic=논리
+type=유형, 종류
+analysis=분석
+described=(described as) ~라고 묘사되는
+vertical=수직의 (vertical reading: 수직적 읽기)
+reading=읽기
+involves=~을 수반하다, 포함하다
+relying=(rely on) ~에 의존하는 것
+text=글, 본문
+determine=판단하다, 결정하다
+reliability=신뢰도
+validity=타당성
+information=정보
+learn=배우다
+examine=살펴보다, 검토하다
+authors=저자의 (author's)
+references=참고 자료, 참고 문헌
+based=(based on) ~을 바탕으로 한
+having=~하고 나서 (Having + 과거분사: 완료 분사구문)
+read=읽다; 읽은 (과거·과거분사도 read)
+book=책
+reader=독자
+review=검토하다, 살펴보다
+presented=제시된
+supported=뒷받침되는
+enough=충분한
+evidence=증거, 근거
+look=보다 (look at: 살펴보다 / look up: 찾아보다)
+publisher=출판사
+check=확인하다
+cited=인용된
+technology=기술
+changed=바꾸었다
+landscape=환경, 지형
+write=쓰다
+publish=출판하다, 펴내다
+making=~하게 만들면서 (분사구문)
+necessary=필요한
+strategies=전략들
+since=~ 때문에; ~ 이래로
+nowhere=(nowhere near) 결코 ~이 아닌
+advanced=발달한, 진보한
+today=오늘날
+understandable=이해할 만한
+convince=(convince A of B) A에게 B를 믿게 하다
+general=일반적인 (the general public: 일반 대중)
+public=대중
+existence=존재
+prevent=(prevent A from -ing) A가 ~하지 못하게 막다
+fooled=속은
+now=지금
+make=만들다, ~하게 하다
+easier=더 쉬운
+tricked=속은
+victim=피해자 (fall victim to: ~에 속아 넘어가다)
+hoaxes=거짓말, 날조된 이야기
+accept=받아들이다
+false=거짓의
+claims=주장; 주장하다
+dont=~하지 않다 (do not)
+verify=검증하다, 사실인지 확인하다
+begs=(beg the question) 의문을 불러일으키다
+question=질문, 의문
+possible=가능한
+vast=방대한
+amounts=양
+internet=인터넷
+relatively=비교적
+easy=쉬운
+verifying=검증하는 것
+validating=타당한지 확인하는 것
+publishing=출판
+standards=기준
+meet=(기준을) 충족하다
+removes=없애다
+barriers=장벽
+millions=수백만
+makes=~하게 만들다 (makes it harder: 더 어렵게 만들다)
+harder=더 어려운
+reliable=믿을 만한
+valid=타당한
+environment=환경
+important=중요한
+still=여전히; 가만히 있는
+useful=유용한
+must=~해야 한다
+adopted=채택된, 받아들여진
+navigate=헤쳐 나가다, 길을 찾다
+online=온라인의
+world=세계, 세상
+lateral=수평의, 옆으로의 (lateral reading: 수평적 읽기)
+checking=확인하는 것
+sources=자료, 출처
+multiple=여러, 다수의
+various=다양한
+types=유형, 종류
+content=내용, 콘텐츠
+videos=영상
+helpful=도움이 되는
+gain=얻다
+insight=통찰
+suppose=가정하다 (~라고 해 보자)
+student=학생
+reads=읽다
+popular=인기 있는
+site=사이트
+population=인구, 집단
+statistics=통계
+number=수 (the number of: ~의 수)
+hospitalized=입원한
+poor=나쁜, 부실한
+diet=식습관, 식단
+employ=(전략·방법을) 쓰다, 이용하다
+strategy=전략
+simply=간단히, 그저
+opening=여는 것
+tab=(브라우저의) 탭
+browser=브라우저
+accessing=접속하는 것, 이용하는 것
+numbers=수치
+open=열다
+tabs=탭들
+wants=원하다
+charts=도표
+tables=표
+assertions=주장, 단언
+sites=사이트들
+go=가다
+scientific=과학의
+journal=학술지
+primary=1차의, 주요한 (primary source: 1차 출처)
+employing=(전략을) 쓰는, 이용하는
+advantage=이점 (take advantage of: ~을 이용하다)
+volume=양
+utilize=활용하다
+tools=도구
+help=돕다
+simultaneously=동시에
+companies=기업들
+currently=현재
+use=사용하다
+allows=(allow A to B) A가 B할 수 있게 하다
+easily=쉽게
+crosscheck=교차 확인하다
+data=자료, 데이터
+distinguish=(distinguish A from B) A와 B를 구별하다
+opinions=의견
+facts=사실
+efficiently=효율적으로
+maintain=유지하다
+hire=고용하다
+factcheckers=팩트 체커, 사실 확인 담당자
+anything=무엇이든
+quick=빠른
+survey=훑어보다, 조사하다; 조사
+already=이미
+been=be의 과거분사 (has been written: 쓰여 왔다)
+imagine=상상하다, 떠올리다
+agency=(news agency) 통신사
+website=웹사이트
+merger=합병
+corporations=기업들
+variety=다양성 (a variety of: 다양한)
+ensure=확실히 하다, 보장하다
+accurate=정확한
+recent=최근의
+surveys=조사들
+utilized=활용한
+broader=더 폭넓은
+understanding=이해
+kind=종류
+used=사용한
+less=덜
+optimal=최적의
+perfect=완벽한
+neither=~도 아니다 (neither is ~: ~도 그렇지 않다)
+takes=(take advantage of) ~을 이용하다
+greater=더 큰
+modern=현대의
+fully=충분히, 완전히
+appreciate=진가를 알다, 제대로 이해하다
+evaluating=평가하는 것
+forms=형태
+habit=습관
+matter=(no matter how) 아무리 ~하더라도
+neutral=중립적인
+publication=출판물
+burden=부담, 책임
+falls=(fall upon) ~에게 돌아가다, ~의 몫이다
+upon=~ 위에, ~에게
+much=많은 (as much ~ as possible: 가능한 한 많은)
+understand=이해하다
+therefore=따라서
+itself=그 자체
+constantly=끊임없이
+evolving=변화하는, 진화하는
+remain=~인 채로 있다, 머무르다
+should=~해야 한다
+reason=이유
+continuous=계속되는
+repetitive=반복되는
+process=과정
+instead=(instead of) ~ 대신에
+approaching=다가가는 것, 대하는 것
+perspective=관점
+mere=단순한, ~에 불과한
+consumer=소비자
+actively=능동적으로
+dynamically=역동적으로
+engage=(engage with) ~와 관계 맺다, ~에 참여하다
+trying=노력하면서 (try to: ~하려고 애쓰다)
+`.trim().split('\n').forEach(l => { const p = l.indexOf('='); GLOSS[l.slice(0, p)] = l.slice(p + 1); });
+
+// 어법 선택 문제. [정답, 오답, 해설, (같은 단어가 여러 번 나올 때 몇 번째인지)]
+const GQ = {
+  'u3-0': [
+    ['finishing', 'finished', 'be up late + -ing: ~하느라 늦게까지 깨어 있다. 깨어 있는 동안 함께 한 일이므로 현재분사 finishing을 쓴다.'],
+    ['shooting', 'shot', 'and 앞의 tapping과 함께 starts의 목적어인 동명사로 병렬 연결되므로 shooting. shot을 쓰면 현재시제로 이어지는 글의 시제와도 맞지 않는다.'],
+    ['Embarrassed', 'Embarrassing', '분사구문의 의미상 주어 she가 창피함을 느끼는 쪽이므로 과거분사 Embarrassed. -ing는 남을 창피하게 만드는 쪽에 쓴다.'],
+    ['felt', 'feel', 'Have you ever ~?는 경험을 묻는 현재완료(have + 과거분사)이므로 felt.']
+  ],
+  'u3-1': [
+    ['eating', 'eat', 'After가 전치사로 쓰였으므로 뒤에는 동명사 eating.'],
+    ['relaxed', 'relaxing', '우리가 편안함을 느끼는 상태이므로 과거분사 relaxed. relaxing은 남을 편안하게 해 주는 대상에 쓴다.'],
+    ['sparks', 'spark', '주어 hunger(단수)에 이어지는 동사로, 앞의 causes와 and로 병렬 연결되므로 sparks.'],
+    ['What', 'That', '뒤의 this slogan means에 목적어가 빠진 불완전한 절이고 앞에 선행사가 없으므로, 선행사를 포함한 관계대명사 What이 주어절을 이끈다.'],
+    ['annoyed', 'annoying', 'get + 과거분사: (감정을) 느끼게 되다. 짜증을 느끼는 쪽이므로 annoyed.'],
+    ['is', 'are', '주어는 The phenomenon(단수)이고 of getting ~ hunger는 수식어이므로 단수 동사 is.', 2],
+    ['so', 'such', 'so + 형용사 + that ~: 너무 ~해서 …하다. 뒤에 명사 없이 형용사 common이 오므로 so.'],
+    ['has', 'have', '주어는 the word(단수)이고, 콤마 사이의 a combination of ~는 동격 삽입구이므로 has.']
+  ],
+  'u3-2': [
+    ['hundred', 'hundreds', 'two, three 같은 구체적인 숫자 뒤의 hundred는 복수형으로 쓰지 않는다. hundreds of는 막연히 수백의라는 뜻일 때만 쓴다.'],
+    ['eat', 'eating', 'either A or B에서 A와 B는 같은 형태여야 한다. to 뒤의 skip과 짝을 이루므로 동사원형 eat.'],
+    ['involving', 'involved', '과제가 ~을 포함하는 능동 관계이므로 현재분사 involving이 tasks를 꾸민다.'],
+    ['were', 'was', '주어는 Their performance and behavior로 A and B 형태의 복수이므로 were.', 2],
+    ['those', 'that', '비교 대상인 participants(복수 명사)를 대신하므로 those. that은 단수 명사를 대신한다.'],
+    ['which', 'that', '전치사 in 뒤에는 관계대명사 that을 쓸 수 없으므로 in which.'],
+    ['printed', 'printing', '색 이름이 인쇄된 것(수동)이므로 과거분사 printed.'],
+    ['contributes', 'contribute', 'that절의 주어는 an empty stomach(단수)이므로 contributes.']
+  ],
+  'u3-3': [
+    ['absorbed', 'absorbing', '포도당이 세포에 흡수되는 것(수동)이므로 gets + 과거분사 absorbed. 뒤의 by cells도 수동의 단서다.'],
+    ['required', 'requiring', '에너지가 필요로 되는 것(수동)이므로 과거분사 required가 energy를 꾸민다.'],
+    ['fall', 'falls', '주어는 glucose levels(복수)이므로 fall.'],
+    ['preventing', 'prevented', '앞 절 전체를 받아 이어지는 분사구문으로, 세포가 일하지 못하게 막는 능동의 의미이므로 preventing.'],
+    ['what', 'that', '앞에 선행사가 없고 do의 목적어가 빠진 불완전한 절이므로 what. 이 절이 performing의 목적어 역할을 한다.'],
+    ['releasing', 'release', '전치사 by 뒤에는 동명사가 오므로 releasing.'],
+    ['cope', 'coping', 'help + 목적어 + (to) 동사원형: 목적어가 ~하도록 돕다. 따라서 cope.'],
+    ['lead', 'leads', '주어는 Elevated cortisol levels(복수)이므로 lead.']
+  ],
+  'u3-4': [
+    ['What', 'That', '뒤에 주어가 빠진 불완전한 절이고 선행사도 없으므로 What이 주어절을 이끈다. 이 What절이 문장 전체의 주어다.'],
+    ['affected', 'affecting', '뇌가 영향을 받는 것(수동)이고 뒤에 by가 있으므로 is affected.'],
+    ['cause', 'causes', 'that절의 주어는 high levels(복수)이고 of cortisol은 수식어이므로 cause.'],
+    ['to drop', 'drop', 'cause + 목적어 + to부정사: 목적어가 ~하게 하다. 사역동사 make와 달리 cause는 to를 쓴다.'],
+    ['maintaining', 'maintain', '전치사 in 뒤에는 동명사가 오므로 maintaining.'],
+    ['which', 'that', '콤마 뒤에서 앞 절 전체를 받는 계속적 용법에는 that을 쓸 수 없으므로 which.'],
+    ['increase', 'increases', 'when절 다음의 주어는 areas(복수)이고 related to ~ emotions는 수식어이므로 increase.'],
+    ['are', 'is', '주어는 the activity patterns(복수)이고 in areas ~ decision-making은 수식어이므로 are.', 3]
+  ],
+  'u3-5': [
+    ['gets', 'get', 'that절의 주어 everyone은 단수 취급하므로 gets. who is hungry는 everyone을 꾸미는 수식어다.'],
+    ['is', 'are', '주어는 the behavior(단수)이고 of many animals는 수식어이므로 is.', 2],
+    ['deprived', 'depriving', 'when (they are) deprived of ~: ~을 빼앗겼을 때. 초파리가 먹이를 빼앗기는 것(수동)이므로 deprived.'],
+    ['them', 'it', '앞의 their negative emotions(복수)를 가리키므로 them.'],
+    ['angry', 'angrily', 'find + 목적어 + 형용사: 목적어가 ~한 상태임을 알게 되다. 목적격 보어 자리이므로 형용사 angry.'],
+    ['ask', 'asking', '명령문 take ~ and ask ~로 동사원형이 병렬 연결되므로 ask.'],
+    ['What', 'That', '뒤에 주어가 빠진 불완전한 절이고 선행사가 없으므로 What이 주어절을 이끈다.']
+  ],
+  'u3-6': [
+    ['refers', 'refer', '주어는 동명사구 being hangry이고 동명사 주어는 단수 취급하므로 refers.'],
+    ['caused', 'causing', '분노가 신체적 필요에 의해 생기는 것(수동)이므로 caused by.'],
+    ['called', 'calling', '현상이 ~라고 불리는 것(수동)이므로 과거분사 called.'],
+    ['works', 'work', '주절의 주어는 a phenomenon(단수)이므로 works. called “lonely hunger”는 수식어다.'],
+    ['hungry', 'hungrily', 'feel은 감각동사로 보어 자리에 형용사가 온다. 따라서 hungry.'],
+    ['isolated', 'isolating', '사람이 고립된 상태(수동)이므로 과거분사 isolated. lonely와 함께 feel의 보어다.'],
+    ['looking', 'looked', '주절의 주어 some people이 위안을 찾는 능동의 의미인 분사구문이므로 looking.'],
+    ['relieve', 'relieving', 'a good way to + 동사원형: ~하는 좋은 방법. to부정사이므로 relieve.']
+  ],
+  'u3-7': [
+    ['its', 'their', '단수 명사 the human brain을 가리키므로 its.'],
+    ['shown', 'showed', 'have + 과거분사의 현재완료이므로 shown.'],
+    ['turned', 'turning', '뇌 영역이 켜지는 것(수동)이므로 is turned on.'],
+    ['that', 'which', 'the notion의 내용을 설명하는 동격절은 접속사 that으로 이끈다. 뒤의 절이 완전하고, 동격절에는 which를 쓰지 않는다.', 2],
+    ['indicating', 'indicated', '앞 내용을 이어받아 결핍이 있음을 나타내는 능동의 의미인 분사구문이므로 indicating.'],
+    ['addressed', 'addressing', '결핍이 해결되어야 하는 것(수동)이므로 need to be + 과거분사.', 1],
+    ['leads', 'lead', 'Just as 절의 주어는 a lack(단수)이고 of physical nourishment는 수식어이므로 leads.'],
+    ['results', 'result', '주절의 주어는 a lack(단수)이므로 results. result in: ~을 낳다.']
+  ],
+  'u4-0': [
+    ['themselves', 'them', '사진을 찍은 주체와 찍힌 대상이 같은 two young girls이므로 재귀대명사 themselves.'],
+    ['playing', 'played', 'show + 목적어 + 현재분사: 목적어가 ~하고 있는 모습을 보여 주다. 소녀들이 노는 능동이므로 playing.'],
+    ['claiming', 'claimed', '글이 ~라고 주장하는 능동 관계이므로 현재분사 claiming이 an article을 꾸민다. claimed를 쓰면 한 문장에 동사가 두 개가 된다.'],
+    ['did the girls', 'the girls did', 'Only + 부사구가 문장 앞에 오면 주어와 조동사가 도치된다. Only after ~ did + 주어 + 동사원형.'],
+    ['admit', 'admitted', '도치된 did 뒤에는 동사원형이 오므로 admit.'],
+    ['made', 'making', '모든 일이 꾸며진 것(수동)이므로 was made up.'],
+    ['demonstrating', 'demonstrated', '이야기가 중요성을 보여 주는 능동 관계이므로 현재분사 demonstrating이 a cautionary tale을 꾸민다.']
+  ],
+  'u4-1': [
+    ['passed', 'passing', '지식이 전해지는 것(수동)이므로 was passed down.'],
+    ['what', 'that', '앞에 선행사가 없고 주어가 빠진 불완전한 절이므로 what. not what was said는 말해진 내용이 아니라라는 뜻이다.'],
+    ['was', 'were', '주어는 The credibility(단수)이고 of the speaker와 콤마 사이 삽입구는 수식어이므로 was.', 3],
+    ['written', 'writing', '글로 쓰인 자료(수동)이므로 과거분사 written. writing materials는 필기도구라는 다른 뜻이 된다.'],
+    ['prevalent', 'prevalently', 'become은 보어를 취하는 동사이므로 형용사 prevalent.'],
+    ['limited', 'limiting', 'be limited to: ~로 제한되다. 독자들이 제한을 받는 쪽이므로 과거분사.'],
+    ['described', 'describing', '이런 분석이 ~라고 묘사되는 것(수동)이므로 can be described as.']
+  ],
+  'u4-2': [
+    ['relying', 'to rely', 'involve는 동명사를 목적어로 취하는 동사이므로 relying.'],
+    ['Having', 'Have', '완료분사구문 Having + 과거분사: 주절보다 먼저 일어난 일(책을 다 읽은 것)을 나타낸다.'],
+    ['presented', 'presenting', '주장이 글에 제시된 것(수동)이므로 과거분사 presented.'],
+    ['are', 'is', 'if절의 주어는 the arguments(복수)이고 presented in the text는 수식어이므로 are.'],
+    ['look', 'looking', 'can 뒤에 review ~, look at ~, or check ~가 동사원형으로 병렬 연결되므로 look.'],
+    ['cited', 'citing', '참고 문헌이 인용된 것(수동)이므로 과거분사 cited.'],
+    ['which', 'that', '전치사 in 뒤에는 관계대명사 that을 쓸 수 없으므로 in which.'],
+    ['it', 'that', 'make + 가목적어 it + 형용사 + 진목적어(to부정사) 구조. 진짜 목적어 to change reading strategies 대신 it을 쓴다.']
+  ],
+  'u4-3': [
+    ['understandable', 'understanding', '가주어 it + be + 형용사 + that절. 그 사실이 이해할 만하다는 뜻이므로 understandable.'],
+    ['being fooled', 'fooling', 'prevent A from -ing에서 사람들이 속는 것(수동)이므로 being + 과거분사.'],
+    ['even', 'very', '비교급 easier를 강조할 때는 even, much, still, far를 쓴다. very는 비교급을 꾸미지 못한다.'],
+    ['easier', 'easily', 'make + 가목적어 it + 목적격 보어 + 진목적어(to부정사). 목적격 보어 자리이므로 형용사 easier.'],
+    ['tricked', 'tricking', 'get + 과거분사: ~당하다. 사람이 속는 쪽이므로 tricked.'],
+    ['because', 'because of', 'because 뒤에는 주어와 동사를 갖춘 절(they don’t know ~)이 오고, because of 뒤에는 명사(구)가 온다.']
+  ],
+  'u4-4': [
+    ['such', 'so', 'such + (형용사) + 복수·셀 수 없는 명사. 뒤에 명사 amounts가 있으므로 such. so는 바로 뒤에 형용사나 부사가 온다.'],
+    ['is', 'are', '주어는 동명사구 finding information이고 동명사 주어는 단수 취급하므로 is.', 2],
+    ['were', 'was', 'there + be 구문에서는 뒤의 명사가 주어다. publishing standards(복수)이므로 were.'],
+    ['that', 'what', '앞에 선행사 publishing standards가 있고 meet의 목적어가 빠진 절이므로 관계대명사 that. what은 선행사가 없을 때 쓴다.'],
+    ['removes', 'remove', '주어는 the Internet(단수)이므로 removes.'],
+    ['harder', 'hardly', 'make + 가목적어 it + 목적격 보어 + 진목적어(to부정사). 목적격 보어 자리이므로 형용사 harder. hardly는 거의 ~않다라는 부사다.'],
+    ['for', 'of', 'to부정사의 의미상 주어는 보통 for + 목적격. of는 kind, wise처럼 사람의 성격을 나타내는 형용사 뒤에서만 쓴다.', 2],
+    ['more', 'most', '뒤에 than ever가 있으므로 비교급 more important.']
+  ],
+  'u4-5': [
+    ['adopted', 'adopting', '새 전략이 받아들여져야 하는 것(수동)이므로 must be adopted.'],
+    ['is', 'are', 'One of + 복수 명사가 주어일 때 중심 주어는 One이므로 단수 동사 is.', 2],
+    ['which', 'that', '콤마 뒤 계속적 용법에는 that을 쓸 수 없으므로 which.'],
+    ['verifying', 'to verify', 'involve는 동명사를 목적어로 취하는 동사이므로 verifying.'],
+    ['sources', 'source', 'as many + 복수 명사 + as ~: ~만큼 많은. many 뒤이므로 복수 sources.', 1],
+    ['is', 'are', '주어는 동명사구 Checking information ~ videos이고 동명사 주어는 단수 취급하므로 is.', 5],
+    ['gain', 'gaining', 'to verify ~ and gain ~으로 to 뒤의 동사원형이 병렬 연결되므로 gain.']
+  ],
+  'u4-6': [
+    ['Having', 'Have', '완료분사구문 Having + 과거분사: 주절보다 먼저 통계를 접한 일을 나타낸다.'],
+    ['are', 'is', '관계대명사 who의 선행사는 the number가 아니라 people(복수)이므로 are.'],
+    ['opening', 'open', '전치사 by 뒤에는 동명사가 오므로 opening.'],
+    ['reads', 'reading', 'suppose (that) + 주어 + 동사: ~라고 가정해 보자. that이 생략된 절이므로 주어 a student 뒤에 동사 reads가 와야 한다.'],
+    ['another', 'other', 'another + 단수 명사: 또 하나의 ~. tab이 단수이므로 another.'],
+    ['tabs', 'tab', 'as many + 복수 명사 + as ~: ~만큼 많은. many 뒤이므로 복수 tabs.'],
+    ['being presented', 'presenting', '정보가 제시되고 있는 것(수동 진행)이므로 being + 과거분사.'],
+    ['go', 'going', 'can 뒤의 look up ~과 or로 병렬 연결되므로 동사원형 go.']
+  ],
+  'u4-7': [
+    ['employing', 'employed', '독자가 수평적 읽기를 이용하는 능동 관계이므로 현재분사 employing이 Readers를 꾸민다.'],
+    ['help', 'helps', '관계대명사 that의 선행사는 Internet browser tools(복수)이므로 help.'],
+    ['review', 'reviewing', 'help + (목적어) + (to) 동사원형이므로 review.'],
+    ['use', 'uses', '주어 Many people and companies는 A and B 형태의 복수이므로 use.'],
+    ['them', 'themselves', 'allows의 주어 it(이 전략)과 목적어(사람과 기업들)가 다르므로 재귀대명사가 아닌 them.'],
+    ['distinguish', 'distinguishing', 'allow + 목적어 + to부정사에서 to (more easily) cross-check, distinguish, evaluate가 병렬 연결되므로 동사원형 distinguish.'],
+    ['efficiently', 'efficient', '동사 evaluate를 꾸미므로 부사 efficiently.']
+  ],
+  'u4-8': [
+    ['publishing', 'publish', '전치사 before 뒤에는 동명사가 오므로 publishing.'],
+    ['what', 'that', '앞에 선행사가 없고 주어가 빠진 불완전한 절이므로 what. 이 절이 survey의 목적어 역할을 한다.'],
+    ['written', 'writing', '이미 쓰인 것(수동)이므로 has been + 과거분사.'],
+    ['wants', 'want', '관계대명사 that의 선행사는 a news agency(단수)이므로 wants.'],
+    ['its', 'their', 'a news agency(단수)를 가리키므로 its.'],
+    ['found', 'finding', '참가자들이 ~하다고 밝혀진 것(수동)이므로 were found to.'],
+    ['broader', 'broad', '뒤에 than participants ~가 있으므로 비교급 broader.']
+  ],
+  'u4-9': [
+    ['neither', 'either', '앞 절이 부정(is not)일 때 ~도 그렇지 않다는 neither + 동사 + 주어로 도치한다.', 1],
+    ['greater', 'great', '뒤에 than vertical reading이 있으므로 비교급 greater.'],
+    ['evaluating', 'evaluate', 'make + 목적어 + 목적격 보어(a habit) 구조에서 목적어 자리에는 동명사구 evaluating ~ information이 온다.'],
+    ['neutral', 'neutrally', 'No matter how + 형용사 + 주어 + 동사. how neutral은 claims to be의 보어이므로 형용사.'],
+    ['falls', 'fall', '주어는 the burden(단수)이고 of evaluation은 수식어이므로 falls.'],
+    ['much', 'many', 'information은 셀 수 없는 명사이므로 as much ~ as possible.'],
+    ['is', 'are', 'that절의 주어는 the world이고 콤마 사이 and therefore information itself는 삽입구이므로 단수 is.', 3],
+    ['approaching', 'approach', 'Instead of의 of는 전치사이므로 뒤에 동명사 approaching.']
+  ]
+};
+
+// 문제 위치 찾기: 정답 단어(구)가 본문에서 n번째로 나오는 곳.
+function locateGQ(tokens, q) {
+  const words = q[0].split(' ').map(norm);
+  let seen = 0;
+  for (let i = 0; i + words.length <= tokens.length; i++) {
+    if (words.every((w, k) => tokens[i + k].ans === w)) {
+      seen++;
+      if (seen === (q[3] || 1)) return { start: i, len: words.length, right: q[0], wrong: q[1], why: q[2] };
+    }
+  }
+  return null;
+}
+
+const LEVELS = [
+  { n: 1, name: '레벨 1', desc: '단어의 약 20%가 빈칸이에요. 핵심 어휘와 문법 포인트(관계사, 접속사, -ing/-ed 형태)만 가려져요.' },
+  { n: 2, name: '레벨 2', desc: '단어의 약 50%가 빈칸이에요. 핵심 어휘와 문법 포인트가 먼저 가려지고, 나머지도 섞여 나와요.' },
+  { n: 3, name: '레벨 3', desc: '모든 단어가 빈칸이고, 첫 글자만 힌트로 보여요.' },
+  { n: 4, name: '레벨 4', desc: '해석만 보고 문장을 통째로 써요. 한 문장씩 채점하고, 대소문자와 문장부호는 채점하지 않아요.' },
+  { n: 5, name: '레벨 5', desc: '모든 단어가 빈칸이고 힌트가 없어요. 밑줄 길이만 단어 길이를 알려 줘요.' },
+  { n: 6, name: '어법 문제', desc: '내신에 자주 나오는 어법 포인트에서 둘 중 맞는 형태를 골라요. 숫자 키 1, 2로도 고를 수 있고, 고르면 해설이 나와요.' }
+];
+const READ = { n: 0, name: '본문 읽기', desc: '빈칸 없이 본문을 읽어요. 해석 힌트를 켜면 문장마다 한국어 뜻이 함께 나와요.' };
+const WRITE_LV = 4;
+const GRAMMAR_LV = 6;
+const levelInfo = n => (n === 0 ? READ : LEVELS[n - 1]);
+// 레벨 이름 뒤 조사: 3(삼), 6(육)처럼 받침이 있으면 '으로'.
+const ro = name => name + (/[36]$/.test(name) ? '으로' : '로');
+
+const KEY = 'bonmun-blank-game-v1';
+const $ = id => document.getElementById(id);
+const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+const fmt = sec => Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
+
+let save = {};
+try { save = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { save = {}; }
+if (!save._swap45) {
+  Object.keys(save).forEach(k => {
+    const r = save[k];
+    if (k.charAt(0) === '_' || !r || typeof r !== 'object') return;
+    const a = r[4];
+    const b = r[5];
+    delete r[4];
+    delete r[5];
+    if (b) r[4] = b;
+    if (a) r[5] = a;
+  });
+  save._swap45 = 1;
+}
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} }
+
+const sel = { u: 0, s: 0, lv: 0, sent: false };
+let run = null;
+let tick = null;
+let hintOn = false;
+
+function tokenize(text) {
+  let sent = 0;
+  return text.trim().split(/\s+/).map(tok => {
+    const m = tok.match(/^([^A-Za-z0-9]*)(.*?)([^A-Za-z0-9]*)$/);
+    const t = { lead: m[1], core: m[2], trail: m[3], ans: norm(m[2]), blank: false, sent };
+    if (/[.?!]/.test(m[3]) && m[2] !== 'U.S') sent++;
+    return t;
+  });
+}
+
+// 빈칸 가중치: 문법 포인트와 핵심 어휘는 높게, 단순 기능어는 낮게.
+const GRAMMAR = new Set('which what that who whose where while because although if whether as since neither either nor than having being been did due regardless however therefore consequently instead namely just so only'.split(' '));
+const IRREG = new Set('shown made found written caught known become said taken given read turned'.split(' '));
+const KEYWORDS = new Set('hangry hungry angry hunger anger mood lack fuel cells drop fall cope snaps skip genes vary unity fake viral proof hoaxes facts source sources valid verify claims tabs burden habit survey still mere sense logic text'.split(' '));
+const STOP = new Set('a an the of to in on at and or but is are was were be it its this these those we you she her he they their them our your i for with by from not no do does have has had can may will some many more most any all also too then there how about up out into over such like even few one two very when'.split(' '));
+
+function weight(t) {
+  const w = t.ans;
+  if (GRAMMAR.has(w) || IRREG.has(w) || KEYWORDS.has(w)) return 4;
+  if (STOP.has(w)) return 0.4;
+  if (/(ing|ed)$/.test(w) && w.length >= 5) return 4;
+  if (/ly$/.test(w) && w.length >= 6) return 3;
+  if (w.length >= 8) return 4;
+  if (w.length >= 5) return 2.5;
+  return 1.2;
+}
+
+// 가중치가 클수록 뽑힐 확률이 높은 비복원 추출.
+function weightedPick(tokens, idxs, count) {
+  return idxs
+    .map(i => ({ i, k: Math.pow(Math.random(), 1 / weight(tokens[i])) }))
+    .sort((a, b) => b.k - a.k)
+    .slice(0, count)
+    .map(o => o.i);
+}
+
+function pickBlanks(tokens, lv) {
+  const all = tokens.map((t, i) => i).filter(i => tokens[i].ans.length > 0);
+  let chosen;
+  if (lv === 1) {
+    // 레벨 1은 빈칸이 적으니 the, of 같은 단순 기능어는 아예 뺀다.
+    const core = all.filter(i => !STOP.has(tokens[i].ans) || GRAMMAR.has(tokens[i].ans));
+    chosen = weightedPick(tokens, core, Math.round(all.length * 0.2));
+  } else if (lv === 2) {
+    chosen = weightedPick(tokens, all, Math.round(all.length * 0.5));
+  } else if (lv === 3) {
+    chosen = all.filter(i => tokens[i].ans.length >= 2);
+  } else {
+    chosen = all;
+  }
+  chosen.forEach(i => { tokens[i].blank = true; });
+  return chosen.sort((a, b) => a - b);
+}
+
+/* ---------- 저장 기록 ---------- */
+
+function stageKey() { return UNITS[sel.u].id + '-' + sel.s; }
+function rec() { const k = stageKey(); save[k] = save[k] || {}; return save[k]; }
+function missList() {
+  const r = save[stageKey()];
+  return r && Array.isArray(r.miss) ? r.miss : [];
+}
+function addMiss(i) {
+  addVocab(i);
+  const r = rec();
+  if (!Array.isArray(r.miss)) r.miss = [];
+  if (!r.miss.includes(i)) { r.miss.push(i); persist(); }
+}
+function removeMiss(i) {
+  const r = save[stageKey()];
+  if (r && Array.isArray(r.miss) && r.miss.includes(i)) {
+    r.miss = r.miss.filter(x => x !== i);
+    persist();
+  }
+}
+function saveLevel(perfect, bestSec) {
+  const r = rec();
+  const old = r[sel.lv] || null;
+  const oldBest = old && old.best != null ? old.best : null;
+  const oldPerfect = !!old && old.perfect !== false;
+  const isBest = bestSec != null && (oldBest === null || bestSec < oldBest);
+  r[sel.lv] = { best: isBest ? bestSec : oldBest, perfect: perfect || oldPerfect };
+  persist();
+  return isBest;
+}
+
+/* ---------- 틀린 단어장 ---------- */
+
+function vocab() {
+  if (!save._vocab || typeof save._vocab !== 'object') save._vocab = {};
+  return save._vocab;
+}
+function addVocab(i) {
+  const t = run.tokens[i];
+  if (!t || !GLOSS[t.ans]) return;
+  const v = vocab();
+  if (v[t.ans]) return;
+  v[t.ans] = { k: stageKey(), i, t: Date.now() };
+  persist();
+  renderVocab();
+}
+const tokCache = {};
+function stageTokens(k) {
+  if (!tokCache[k]) {
+    const cut = k.lastIndexOf('-');
+    const u = UNITS.find(x => x.id === k.slice(0, cut));
+    const st = u && u.stages[Number(k.slice(cut + 1))];
+    tokCache[k] = st ? tokenize(st.p) : [];
+  }
+  return tokCache[k];
+}
+let vHide = false;
+const vOpen = new Set();
+function renderVocab() {
+  const v = vocab();
+  const keys = Object.keys(v)
+    .filter(w => { const tok = stageTokens(v[w].k)[v[w].i]; return tok && tok.ans === w && GLOSS[w]; })
+    .sort((a, b) => v[b].t - v[a].t);
+  $('vcount').textContent = keys.length + '개';
+  $('vempty').hidden = keys.length > 0;
+  $('vhide').disabled = keys.length === 0;
+  $('vhide').setAttribute('aria-pressed', String(vHide));
+  const ul = $('vlist');
+  ul.innerHTML = '';
+  keys.forEach(w => {
+    const e = v[w];
+    const toks = stageTokens(e.k);
+    const tok = toks[e.i];
+    const shown = !vHide || vOpen.has(w);
+    const li = document.createElement('li');
+
+    const word = document.createElement('span');
+    word.className = 'vw';
+    word.textContent = tok.core;
+
+    const mean = document.createElement('span');
+    mean.className = 'vm';
+    if (shown) mean.textContent = GLOSS[w];
+    else {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = '뜻 보기';
+      b.onclick = () => { vOpen.add(w); renderVocab(); };
+      mean.append(b);
+    }
+
+    const done = document.createElement('button');
+    done.type = 'button';
+    done.className = 'vdone';
+    done.textContent = '외웠어요';
+    done.setAttribute('aria-label', tok.core + ' 단어장에서 빼기');
+    done.onclick = () => { delete v[w]; vOpen.delete(w); persist(); renderVocab(); };
+
+    const ex = document.createElement('p');
+    ex.className = 'vx';
+    toks.forEach((t, idx) => {
+      if (t.sent !== tok.sent) return;
+      if (t.lead) ex.append(t.lead);
+      if (idx === e.i) {
+        const m = document.createElement('mark');
+        m.textContent = t.core;
+        ex.append(m);
+      } else ex.append(t.core);
+      ex.append(t.trail + ' ');
+    });
+    if (shown) {
+      const ko = document.createElement('span');
+      ko.className = 'vko';
+      ko.textContent = (KO[e.k] || [])[tok.sent] || '';
+      ex.append(document.createElement('br'), ko);
+    }
+    li.append(word, mean, done, ex);
+    ul.append(li);
+  });
+}
+
+/* ---------- 선택 영역 ---------- */
+
+function renderUnits() {
+  const box = $('units');
+  box.innerHTML = '';
+  UNITS.forEach((u, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = u.name + ' · ' + u.title;
+    b.setAttribute('aria-pressed', String(i === sel.u));
+    b.onclick = () => { sel.u = i; sel.s = 0; refresh(true); };
+    box.appendChild(b);
+  });
+}
+
+function renderStages() {
+  const box = $('stages');
+  box.innerHTML = '';
+  const u = UNITS[sel.u];
+  u.stages.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'stage';
+    b.setAttribute('aria-pressed', String(i === sel.s));
+    const nm = document.createElement('span');
+    nm.className = 'nm';
+    nm.textContent = (i + 1) + '. ' + s.t;
+    const pips = document.createElement('span');
+    pips.className = 'pips';
+    const r = save[u.id + '-' + i] || {};
+    let cleared = 0;
+    for (let l = 1; l <= LEVELS.length; l++) {
+      const p = document.createElement('i');
+      if (r[l]) { p.className = r[l].perfect === false ? 'part' : 'on'; cleared++; }
+      pips.appendChild(p);
+    }
+    b.setAttribute('aria-label', s.t + ', 완료한 레벨 ' + cleared + '개');
+    b.append(nm, pips);
+    b.onclick = () => { sel.s = i; refresh(true); };
+    box.appendChild(b);
+  });
+}
+
+function renderLevels() {
+  const box = $('levels');
+  box.innerHTML = '';
+  [READ].concat(LEVELS).forEach(l => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = l.name;
+    b.setAttribute('aria-pressed', String(l.n === sel.lv));
+    b.onclick = () => { sel.lv = l.n; refresh(true); };
+    box.appendChild(b);
+  });
+  $('lvdesc').textContent = levelInfo(sel.lv).desc;
+}
+
+function renderOptions() {
+  const sb = $('sentBtn');
+  const noSent = sel.lv === 0 || sel.lv === WRITE_LV || sel.lv === GRAMMAR_LV;
+  sb.setAttribute('aria-pressed', String(sel.sent && !noSent));
+  sb.disabled = noSent;
+  const n = missList().length;
+  $('reviewBtn').textContent = '틀린 단어만 복습 (' + n + '개)';
+  $('reviewBtn').disabled = n === 0;
+}
+
+function renderHud() {
+  $('wrong').textContent = run.missed.length;
+  if (run.mode === 'write') {
+    $('proglabel').textContent = '문장';
+    $('prog').textContent = Math.min(run.si + (run.graded ? 1 : 0), run.sents.length) + ' / ' + run.sents.length;
+  } else if (run.mode === 'read') {
+    $('proglabel').textContent = '문장';
+    $('prog').textContent = run.nSent + '개';
+  } else if (run.mode === 'grammar') {
+    $('proglabel').textContent = '문제';
+    $('prog').textContent = Math.min(run.pos + (run.answered ? 1 : 0), run.items.length) + ' / ' + run.items.length;
+  } else {
+    $('proglabel').textContent = '빈칸';
+    $('prog').textContent = run.pos + ' / ' + run.order.length;
+  }
+  const r = (save[stageKey()] || {})[sel.lv];
+  $('best').textContent = r && r.best != null ? fmt(r.best) : '없음';
+  document.querySelector('.bestwrap').hidden = run.mode !== 'blank' || run.review;
+  renderOptions();
+}
+
+function elapsed() {
+  if (!run.t0) return 0;
+  return ((run.t1 || Date.now()) - run.t0) / 1000;
+}
+function startTimer() {
+  if (run.t0) return;
+  run.t0 = Date.now();
+  tick = setInterval(() => { $('time').textContent = fmt(elapsed()); }, 500);
+}
+
+function updateHint() {
+  const box = $('hint');
+  const list = KO[stageKey()];
+  let at = null;
+  if (run && !run.done && run.mode === 'blank' && !run.paused && run.pos < run.order.length) at = run.order[run.pos];
+  if (run && !run.done && run.mode === 'grammar' && run.pos < run.items.length) at = run.items[run.pos].start;
+  const live = hintOn && at !== null && list;
+  if (live) box.textContent = list[run.tokens[at].sent] || '';
+  box.hidden = !live || !box.textContent;
+}
+
+/* ---------- 빈칸 모드 (레벨 1~4, 복습) ---------- */
+
+function startRun(focus, review, onlyWrong) {
+  clearInterval(tick);
+  const stage = UNITS[sel.u].stages[sel.s];
+  const tokens = tokenize(stage.p);
+  $('ptitle').textContent = stage.t === '도입' ? UNITS[sel.u].title : stage.t;
+  $('result').hidden = true;
+  $('pause').hidden = true;
+  $('writer').hidden = true;
+  $('readbox').hidden = true;
+  $('gbox').hidden = true;
+  $('skip').disabled = false;
+  $('time').textContent = '0:00';
+  const box = $('passage');
+  box.innerHTML = '';
+  box.className = 'passage';
+
+  if (!review && sel.lv === 0) return startRead(tokens, focus);
+  if (!review && sel.lv === WRITE_LV) return startWrite(tokens, focus);
+  if (!review && sel.lv === GRAMMAR_LV) return startGrammar(tokens, focus, onlyWrong);
+
+  let order;
+  if (review) {
+    order = missList().filter(i => tokens[i] && tokens[i].ans).sort((a, b) => a - b);
+    order.forEach(i => { tokens[i].blank = true; });
+  } else {
+    order = pickBlanks(tokens, sel.lv);
+  }
+  run = {
+    mode: 'blank', review: !!review, sentMode: sel.sent && !review,
+    tokens, order, pos: 0, missed: [], t0: 0, t1: 0, done: false, paused: false, pausedAt: 0
+  };
+  $('hintBtn').disabled = false;
+  $('modeNote').textContent = review
+    ? '복습 중이에요. 이 문단에서 틀렸던 단어만 빈칸이고, 맞히면 복습 목록에서 빠져요.'
+    : (run.sentMode ? '한 문장씩 풀어요. 한 문장이 끝나면 엔터를 눌러 다음 문장으로 넘어가요.' : '');
+
+  let sp = null;
+  let curSent = -1;
+  tokens.forEach((t, i) => {
+    if (t.sent !== curSent) {
+      curSent = t.sent;
+      sp = document.createElement('span');
+      sp.className = 'sent';
+      sp.dataset.s = String(curSent);
+      box.append(sp);
+    }
+    if (t.lead) sp.append(t.lead);
+    if (t.blank) {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.id = 'b' + i;
+      inp.disabled = true;
+      inp.autocomplete = 'off';
+      inp.spellcheck = false;
+      inp.setAttribute('autocapitalize', 'off');
+      inp.setAttribute('autocorrect', 'off');
+      inp.setAttribute('aria-label', '빈칸');
+      inp.style.width = 'calc(' + (Math.max(t.core.length, 2) * 1.08).toFixed(1) + 'ch + 14px)';
+      if (sel.lv === 3 && !review) inp.placeholder = t.core.charAt(0);
+      inp.addEventListener('input', onType);
+      inp.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        if (norm(inp.value)) answer(false);
+      });
+      sp.append(inp);
+    } else {
+      sp.append(t.core);
+    }
+    sp.append(t.trail + ' ');
+  });
+  activate(focus);
+  renderHud();
+}
+
+function showSentence(si) {
+  document.querySelectorAll('#passage .sent').forEach(e => {
+    e.hidden = si !== null && Number(e.dataset.s) !== si;
+  });
+}
+
+function curInput() {
+  if (!run || run.mode !== 'blank' || run.pos >= run.order.length) return null;
+  return $('b' + run.order[run.pos]);
+}
+
+function activate(focus) {
+  const inp = curInput();
+  if (inp && run.sentMode) showSentence(run.tokens[run.order[run.pos]].sent);
+  updateHint();
+  if (!inp) return;
+  inp.disabled = false;
+  inp.classList.add('cur');
+  if (focus) inp.focus();
+}
+
+function onType(e) {
+  const inp = e.target;
+  const t = run.tokens[run.order[run.pos]];
+  if (inp.value) startTimer();
+  if (norm(inp.value) === t.ans) answer(true);
+  else if (/\s$/.test(inp.value) && norm(inp.value)) answer(false);
+  else if (/\s$/.test(inp.value)) inp.value = '';
+}
+
+function answer(correct) {
+  if (run.done || run.paused || run.mode !== 'blank') return;
+  const idx = run.order[run.pos];
+  const t = run.tokens[idx];
+  const inp = $('b' + idx);
+  run.pos++;
+  if (correct) {
+    if (run.review) removeMiss(idx);
+  } else {
+    run.missed.push(t.core);
+    addMiss(idx);
+  }
+  const end = run.pos >= run.order.length;
+  const pause = !end && run.sentMode && run.tokens[run.order[run.pos]].sent !== t.sent;
+  // 다음 칸에 먼저 포커스를 준 뒤 지금 칸을 지운다. 순서가 반대면 휴대폰 키보드가 닫힐 수 있다.
+  if (!end && !pause) activate(true);
+  const span = document.createElement('span');
+  span.textContent = t.core;
+  span.className = correct ? 'ok' : 'miss';
+  inp.replaceWith(span);
+  if (pause) {
+    run.paused = true;
+    run.pausedAt = Date.now();
+    $('pause').hidden = false;
+    updateHint();
+    $('nextSent').focus();
+  }
+  renderHud();
+  if (end) finish();
+}
+
+function resumeSentence() {
+  if (!run || !run.paused || Date.now() - run.pausedAt < 300) return;
+  run.paused = false;
+  $('pause').hidden = true;
+  activate(true);
+}
+
+function finish() {
+  run.done = true;
+  run.t1 = Date.now();
+  clearInterval(tick);
+  $('skip').disabled = true;
+  $('pause').hidden = true;
+  showSentence(null);
+  updateHint();
+  const sec = elapsed();
+  $('time').textContent = fmt(sec);
+  const perfect = run.missed.length === 0;
+  const left = () => missList().length;
+
+  if (run.review) {
+    const n = left();
+    showResult({
+      perfect,
+      title: '복습 완료',
+      text: '이번에 틀린 단어 ' + run.missed.length + '개. ' +
+        (n ? '복습 목록에 ' + n + '개가 남았어요.' : '복습 목록을 모두 비웠어요.'),
+      next: n ? { label: '남은 단어 다시 복습', go: () => startRun(true, true) } : null,
+      retryLabel: ro(levelInfo(sel.lv).name) + ' 돌아가기',
+      review: false
+    });
+    return;
+  }
+
+  const timed = !run.sentMode;
+  const isBest = saveLevel(perfect, timed && perfect ? sec : null);
+  let text = '걸린 시간 ' + fmt(sec) + ', 틀린 단어 ' + run.missed.length + '개.';
+  if (isBest) text += ' 최고 기록이에요.';
+  if (!timed) text += ' 한 문장씩 풀 때는 최고 기록을 저장하지 않아요.';
+  else if (!perfect) text += ' 최고 기록은 하나도 안 틀렸을 때만 저장돼요.';
+  showResult({
+    perfect,
+    title: levelInfo(sel.lv).name + (perfect ? ' 완벽하게 완료' : ' 완료'),
+    text,
+    next: nextStep(),
+    retryLabel: '빈칸 바꿔서 다시 하기',
+    review: left() > 0
+  });
+}
+
+function nextStep() {
+  const stages = UNITS[sel.u].stages;
+  if (sel.lv < LEVELS.length) {
+    return { label: ro(levelInfo(sel.lv + 1).name) + ' 넘어가기', go: () => { sel.lv++; refresh(true); } };
+  }
+  if (sel.s < stages.length - 1) {
+    return { label: '다음 문단으로', go: () => { sel.s++; sel.lv = 0; refresh(true); } };
+  }
+  return null;
+}
+
+function showResult(o) {
+  const res = $('result');
+  res.hidden = false;
+  res.className = 'result' + (o.perfect ? '' : ' fail');
+  $('rtitle').textContent = o.title;
+  $('rtext').textContent = o.text;
+  $('rmissed').textContent = run.missed.length ? (o.missedLabel || '틀린 단어: ') + run.missed.join(', ') : '';
+  const next = $('rnext');
+  next.hidden = !o.next;
+  if (o.next) { next.textContent = o.next.label; next.onclick = o.next.go; }
+  $('rreview').hidden = !o.review;
+  $('rreview').textContent = o.reviewLabel || '틀린 단어만 복습';
+  $('rreview').onclick = o.reviewGo || (() => { if (missList().length) startRun(true, true); });
+  $('retry').textContent = o.retryLabel;
+  renderStages();
+  renderHud();
+  res.scrollIntoView({ block: 'nearest' });
+}
+
+/* ---------- 레벨 4: 해석 보고 문장 쓰기 ---------- */
+
+function startWrite(tokens, focus) {
+  const sents = [];
+  tokens.forEach((t, i) => { (sents[t.sent] = sents[t.sent] || []).push(i); });
+  run = {
+    mode: 'write', tokens, sents, si: 0, res: [], missed: [],
+    order: [], pos: 0, t0: 0, t1: 0, done: false, graded: false, gradedAt: 0
+  };
+  $('hintBtn').disabled = true;
+  $('modeNote').textContent = '해석을 보고 영어 문장을 쓴 뒤 엔터를 누르면 채점해요. 채점한 문장은 여기에 쌓여요.';
+  $('writer').hidden = false;
+  updateHint();
+  showWrite(focus);
+}
+
+function showWrite(focus) {
+  run.graded = false;
+  const list = KO[stageKey()] || [];
+  $('wko').textContent = list[run.si] || '';
+  $('wtext').value = '';
+  $('winput').hidden = false;
+  $('wfeedback').hidden = true;
+  $('skip').disabled = false;
+  renderHud();
+  if (focus) $('wtext').focus();
+}
+
+function grade() {
+  if (!run || run.mode !== 'write' || run.done || run.graded) return;
+  const idxs = run.sents[run.si];
+  const A = idxs.map(i => run.tokens[i].ans);
+  const typed = $('wtext').value.trim().split(/\s+/).filter(w => norm(w)).map(w => ({ w, n: norm(w) }));
+  const n = A.length;
+  const m = typed.length;
+
+  // 최장 공통 부분 수열로 맞은 단어를 찾는다. 단어를 빼먹거나 더 써도 나머지는 제대로 맞춰진다.
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = A[i] === typed[j].n ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const okA = new Set();
+  const okB = new Set();
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (A[i] === typed[j].n) { okA.add(i); okB.add(j); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+
+  const sp = document.createElement('span');
+  sp.className = 'sent';
+  sp.dataset.s = String(run.si);
+  const miss = [];
+  idxs.forEach((ti, k) => {
+    const t = run.tokens[ti];
+    if (t.lead) sp.append(t.lead);
+    const w = document.createElement('span');
+    w.textContent = t.core;
+    w.className = okA.has(k) ? 'ok' : 'miss';
+    sp.append(w, t.trail + ' ');
+    if (!okA.has(k)) { miss.push(t.core); addMiss(ti); }
+  });
+  $('passage').append(sp);
+  run.res[run.si] = { miss, total: n };
+  run.missed = run.res.filter(Boolean).flatMap(r => r.miss);
+
+  const mine = $('wmine');
+  mine.innerHTML = '';
+  const head = document.createElement('b');
+  head.textContent = n + '단어 중 ' + okA.size + '단어 맞음. 내가 쓴 답: ';
+  mine.append(head);
+  if (!m) mine.append('(쓰지 않음)');
+  typed.forEach((x, k) => {
+    if (okB.has(k)) mine.append(x.w + ' ');
+    else {
+      const e = document.createElement('span');
+      e.className = 'extra';
+      e.textContent = x.w;
+      mine.append(e, ' ');
+    }
+  });
+
+  run.graded = true;
+  run.gradedAt = Date.now();
+  $('winput').hidden = true;
+  $('wfeedback').hidden = false;
+  $('skip').disabled = true;
+  $('wnext').textContent = run.si >= run.sents.length - 1 ? '결과 보기 (Enter)' : '다음 문장 (Enter)';
+  renderHud();
+  $('wnext').focus();
+}
+
+function nextWrite() {
+  if (!run || run.mode !== 'write' || !run.graded || Date.now() - run.gradedAt < 300) return;
+  run.si++;
+  if (run.si >= run.sents.length) return finishWrite();
+  showWrite(true);
+}
+
+function redoWrite() {
+  if (!run || run.mode !== 'write' || !run.graded) return;
+  const old = document.querySelector('#passage .sent[data-s="' + run.si + '"]');
+  if (old) old.remove();
+  run.res[run.si] = undefined;
+  run.missed = run.res.filter(Boolean).flatMap(r => r.miss);
+  showWrite(true);
+}
+
+function finishWrite() {
+  run.done = true;
+  run.t1 = Date.now();
+  clearInterval(tick);
+  $('writer').hidden = true;
+  $('skip').disabled = true;
+  $('time').textContent = fmt(elapsed());
+  const total = run.res.reduce((a, r) => a + r.total, 0);
+  const wrong = run.missed.length;
+  const perfect = wrong === 0;
+  saveLevel(perfect, null);
+  showResult({
+    perfect,
+    title: levelInfo(WRITE_LV).name + (perfect ? ' 완벽하게 완료' : ' 완료'),
+    text: '전체 ' + total + '단어 중 ' + (total - wrong) + '단어를 맞혔어요 (' +
+      Math.round((total - wrong) / total * 100) + '%).',
+    next: nextStep(),
+    retryLabel: '처음부터 다시 쓰기',
+    review: missList().length > 0
+  });
+}
+
+/* ---------- 본문 읽기 ---------- */
+
+function startRead(tokens, focus) {
+  run = { mode: 'read', tokens, nSent: 0, order: [], items: [], pos: 0, missed: [], t0: 0, t1: 0, done: false };
+  run.nSent = tokens.length ? tokens[tokens.length - 1].sent + 1 : 0;
+  $('hintBtn').disabled = false;
+  $('skip').disabled = true;
+  $('modeNote').textContent = '빈칸 없이 본문 전체를 읽어요. 다 읽으면 아래 버튼으로 레벨 1에 들어가요.';
+  renderRead();
+  $('readbox').hidden = false;
+  renderHud();
+  updateHint();
+  if (focus) $('readDone').focus({ preventScroll: true });
+}
+
+function renderRead() {
+  const box = $('passage');
+  box.innerHTML = '';
+  box.className = 'passage reading' + (hintOn ? ' withko' : '');
+  const list = KO[stageKey()] || [];
+  let sp = null;
+  let cur = -1;
+  run.tokens.forEach(t => {
+    if (t.sent !== cur) {
+      if (sp && hintOn) {
+        const ko = document.createElement('span');
+        ko.className = 'rko';
+        ko.textContent = list[cur] || '';
+        sp.append(ko);
+      }
+      cur = t.sent;
+      sp = document.createElement('span');
+      sp.className = 'sent';
+      box.append(sp);
+    }
+    sp.append(t.lead + t.core + t.trail + ' ');
+  });
+  if (sp && hintOn) {
+    const ko = document.createElement('span');
+    ko.className = 'rko';
+    ko.textContent = list[cur] || '';
+    sp.append(ko);
+  }
+}
+
+/* ---------- 어법 문제 ---------- */
+
+function startGrammar(tokens, focus, onlyWrong) {
+  let items = (GQ[stageKey()] || [])
+    .map((q, id) => { const r = locateGQ(tokens, q); if (r) r.id = id; return r; })
+    .filter(Boolean)
+    .sort((a, b) => a.start - b.start);
+  if (onlyWrong) items = items.filter(it => onlyWrong.includes(it.id));
+  items.forEach(it => { it.flip = Math.random() < 0.5; });
+  run = {
+    mode: 'grammar', tokens, items, order: [], pos: 0, missed: [], wrongIds: [],
+    answered: false, answeredAt: 0, retry: !!onlyWrong, t0: 0, t1: 0, done: false
+  };
+  $('hintBtn').disabled = false;
+  $('modeNote').textContent = (onlyWrong ? '틀린 문제만 다시 풀어요. ' : '') +
+    '노란 칸에서 맞는 형태를 고르세요. 숫자 키 1, 2로도 고를 수 있어요.';
+
+  const box = $('passage');
+  box.className = 'passage gram';
+  const byStart = new Map(items.map((it, j) => [it.start, j]));
+  let sp = null;
+  let cur = -1;
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.sent !== cur) {
+      cur = t.sent;
+      sp = document.createElement('span');
+      sp.className = 'sent';
+      box.append(sp);
+    }
+    if (!byStart.has(i)) { sp.append(t.lead + t.core + t.trail + ' '); continue; }
+    const j = byStart.get(i);
+    const it = items[j];
+    const last = tokens[i + it.len - 1];
+    if (t.lead) sp.append(t.lead);
+    const g = document.createElement('span');
+    g.className = 'gq';
+    g.id = 'g' + j;
+    const opts = it.flip ? [it.wrong, it.right] : [it.right, it.wrong];
+    opts.forEach((txt, k) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.disabled = true;
+      b.dataset.n = String(k + 1);
+      const num = document.createElement('small');
+      num.textContent = String(k + 1);
+      b.append(num, txt);
+      b.setAttribute('aria-label', (k + 1) + '번 ' + txt);
+      b.onclick = () => choose(j, txt === it.right);
+      g.append(b);
+    });
+    sp.append(g, last.trail + ' ');
+    i += it.len - 1;
+  }
+  activateG(focus);
+  renderHud();
+}
+
+function activateG(focus) {
+  run.answered = false;
+  $('gbox').hidden = true;
+  updateHint();
+  const g = $('g' + run.pos);
+  if (!g) return;
+  g.classList.add('cur');
+  g.querySelectorAll('button').forEach(b => { b.disabled = false; });
+  if (focus) g.querySelector('button').focus();
+}
+
+function choose(j, ok) {
+  if (!run || run.mode !== 'grammar' || run.done || run.answered || j !== run.pos) return;
+  startTimer();
+  const it = run.items[j];
+  const g = $('g' + j);
+  g.classList.remove('cur');
+  g.innerHTML = '';
+  if (!ok) {
+    const s = document.createElement('span');
+    s.className = 'extra';
+    s.textContent = it.wrong;
+    g.append(s);
+    run.missed.push(it.right);
+    run.wrongIds.push(it.id);
+  }
+  const r = document.createElement('span');
+  r.className = ok ? 'ok' : 'miss';
+  r.textContent = it.right;
+  g.append(r);
+
+  const why = $('gwhy');
+  why.innerHTML = '';
+  const head = document.createElement('b');
+  head.textContent = ok ? '정답이에요. ' : '정답은 ' + it.right + '. ';
+  why.append(head, it.why);
+  $('gbox').className = 'gbox' + (ok ? '' : ' bad');
+  $('gbox').hidden = false;
+  $('gnext').textContent = run.pos >= run.items.length - 1 ? '결과 보기 (Enter)' : '다음 문제 (Enter)';
+  run.answered = true;
+  run.answeredAt = Date.now();
+  $('skip').disabled = true;
+  updateHint();
+  renderHud();
+  $('gnext').focus({ preventScroll: true });
+  $('gbox').scrollIntoView({ block: 'nearest' });
+}
+
+function nextG() {
+  if (!run || run.mode !== 'grammar' || !run.answered || Date.now() - run.answeredAt < 300) return;
+  run.pos++;
+  if (run.pos >= run.items.length) return finishGrammar();
+  $('skip').disabled = false;
+  activateG(true);
+  renderHud();
+}
+
+function finishGrammar() {
+  run.done = true;
+  run.answered = false;
+  run.t1 = Date.now();
+  clearInterval(tick);
+  $('gbox').hidden = true;
+  $('skip').disabled = true;
+  $('time').textContent = fmt(elapsed());
+  updateHint();
+  const n = run.items.length;
+  const wrong = run.missed.length;
+  const perfect = wrong === 0;
+  if (!run.retry) saveLevel(perfect, null);
+  const ids = run.wrongIds.slice();
+  showResult({
+    perfect,
+    title: (run.retry ? '틀린 문제 다시 풀기' : '어법 문제') + (perfect ? ' 완벽하게 완료' : ' 완료'),
+    text: n + '문제 중 ' + (n - wrong) + '문제를 맞혔어요.' +
+      (run.retry ? ' 틀린 문제만 다시 푼 결과는 완료 표시에 반영하지 않아요.' : ''),
+    missedLabel: '틀린 문제의 정답: ',
+    next: nextStep(),
+    retryLabel: '처음부터 다시 풀기',
+    review: ids.length > 0,
+    reviewLabel: '틀린 문제만 다시 풀기',
+    reviewGo: () => startRun(true, false, ids)
+  });
+}
+
+/* ---------- 연결 ---------- */
+
+function refresh(focus) {
+  renderUnits();
+  renderStages();
+  renderLevels();
+  startRun(focus);
+}
+
+$('skip').onclick = () => {
+  if (!run || run.done) return;
+  if (run.mode === 'write') grade();
+  else if (run.mode === 'grammar') choose(run.pos, false);
+  else if (run.mode === 'blank') answer(false);
+};
+$('readDone').onclick = () => { sel.lv = 1; refresh(true); };
+$('gnext').onclick = nextG;
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing || !run || run.done) return;
+  const t = e.target;
+  if (t && (t.tagName === 'BUTTON' || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  if (run.mode === 'grammar' && run.answered) nextG();
+  else if (run.mode === 'blank' && run.paused) resumeSentence();
+  else if (run.mode === 'write' && run.graded) nextWrite();
+});
+document.addEventListener('keydown', e => {
+  if (!run || run.mode !== 'grammar' || run.done || run.answered || e.isComposing) return;
+  if (e.key !== '1' && e.key !== '2') return;
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  const b = document.querySelector('#g' + run.pos + ' button[data-n="' + e.key + '"]');
+  if (b) { e.preventDefault(); b.click(); }
+});
+$('hintBtn').onclick = () => {
+  hintOn = !hintOn;
+  $('hintBtn').setAttribute('aria-pressed', String(hintOn));
+  updateHint();
+  if (run && run.mode === 'read') renderRead();
+  const inp = curInput();
+  if (inp && !run.done && !run.paused) inp.focus();
+};
+$('sentBtn').onclick = () => { sel.sent = !sel.sent; startRun(true); };
+$('reviewBtn').onclick = () => { if (missList().length) startRun(true, true); };
+$('rreview').onclick = () => { if (missList().length) startRun(true, true); };
+$('nextSent').onclick = resumeSentence;
+$('restart').onclick = () => startRun(true);
+$('retry').onclick = () => startRun(true);
+
+$('vhide').onclick = () => { vHide = !vHide; vOpen.clear(); renderVocab(); };
+
+$('wtext').addEventListener('input', () => { if ($('wtext').value) startTimer(); });
+$('wtext').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing) return;
+  e.preventDefault();
+  if (norm($('wtext').value)) grade();
+});
+$('wgrade').onclick = grade;
+$('wnext').onclick = nextWrite;
+$('wredo').onclick = redoWrite;
+
+refresh(false);
+renderVocab();
+
+// 오프라인 지원: 지원하는 브라우저에서만 켠다. 실패해도 앱은 그대로 동작한다.
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
