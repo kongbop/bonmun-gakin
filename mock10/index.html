@@ -189,6 +189,9 @@ ul.cond{margin:0;padding-left:18px;font-size:.88rem;color:var(--muted)}
 footer{margin-top:24px;font-size:.82rem;color:var(--muted)}
 .xfer{margin:10px 0 16px;border:1px solid var(--rule);border-radius:12px;padding:10px 14px;background:var(--card,#fff)}
 .xfer summary{cursor:pointer;font-weight:600;font-size:.92rem}
+.xstep{font-weight:700;font-size:.85rem;margin-top:10px;color:var(--accent)}
+.xmsg{margin-top:8px;padding:8px 10px;border-radius:8px;background:#eef3ff;color:#1f3a8a;font-size:.88rem;line-height:1.45}
+.xmsg:empty{display:none}
 .xrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 .xcode{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,monospace;border:1px solid var(--rule);border-radius:8px;padding:8px;word-break:break-all}
 .vtype{margin:22px 0 8px;font-size:1rem;color:var(--accent)}
@@ -471,61 +474,79 @@ function mergeRecords(d){
   persistVoc(); persistNote();
   return {va, vs, wa, ws};
 }
+const packPlain = () => 'M10J:' + b64e(new TextEncoder().encode(JSON.stringify({app:'mock10', v:1, at:Date.now(), vocab:VOC.items, wrong:NOTE.items})));
+const recSig = () => vocCount() + ':' + noteCount() + ':' + JSON.stringify([VOC.items, NOTE.items]).length;
 function renderTransfer(m){
   const box = el('details',{class:'xfer'});
   box.appendChild(el('summary',{}, '기록 옮기기 (다른 기기·GitHub 페이지와 단어장·오답 노트 주고받기)'));
-  box.appendChild(el('p',{class:'hint'}, '① 기록이 있는 곳에서 ‘내보내기’를 눌러 코드를 복사하거나 파일로 저장 → ② 옮길 곳(다른 기기, Claude 페이지, GitHub 페이지)에서 같은 메뉴의 ‘가져오기’에 붙여 넣거나 파일을 고르기. 가져오면 지금 기록에 더해지고, 이미 있는 단어·오답은 그대로 둡니다.'));
+  box.appendChild(el('p',{class:'hint'}, '기록을 <b>보내는 곳</b>에서 ‘내보내기’로 코드를 복사하고, 기록을 <b>받을 곳</b>(다른 기기, 또는 Claude ↔ GitHub의 다른 페이지)에서 ‘가져오기’에 붙여 넣으세요. 같은 페이지에서 내보내고 바로 가져오면 이미 다 있는 기록이라 바뀌는 게 없어요.'));
+  const msg = el('div',{class:'xmsg',role:'status'});        // 보내는 곳 안내
+  const imsg = el('div',{class:'xmsg xmsg-in',role:'status'}); // 받는 곳 안내
+  const area = el('textarea',{class:'xcode',rows:'3',readonly:'readonly',placeholder:'‘내보내기’를 누르면 여기에 보낼 코드가 나와요'});
+  const inArea = el('textarea',{class:'xcode',rows:'3',placeholder:'보내는 곳에서 복사한 코드를 여기에 붙여 넣어요',spellcheck:'false'});
+  // 펼칠 때 미리 압축 코드를 만들어 두면, 버튼을 누르는 순간 바로 복사할 수 있다
+  let cache = null;
+  const prep = async () => { const s = recSig(); try{ const c = await packRecords(); cache = {sig: s, code: c}; }catch(e){ cache = null; } };
+  box.addEventListener('toggle', () => { if(box.open) prep(); });
+
+  box.appendChild(el('div',{class:'xstep'}, '① 보내는 곳'));
   const out = el('div',{class:'xrow'});
-  const exBtn = el('button',{class:'btn primary',type:'button'}, '내보내기');
-  const msg = el('div',{class:'hint xmsg'});
-  const area = el('textarea',{class:'xcode',rows:'4',placeholder:'여기에 기록 코드가 나오거나, 가져올 코드를 붙여 넣어요',spellcheck:'false'});
-  exBtn.addEventListener('click', async ()=>{
-    const code = await packRecords();
-    area.value = code; area.focus(); area.select();
-    let copied = false;
-    try{ await navigator.clipboard.writeText(code); copied = true; }catch(e){ try{ copied = document.execCommand('copy'); }catch(e2){} }
-    msg.textContent = `단어 ${vocCount()}개, 오답 ${noteCount()}개를 담았어요. ` + (copied ? '코드를 복사했어요. 옮길 곳에서 ‘가져오기’에 붙여 넣으세요.' : '아래 코드를 길게 눌러 전체 선택한 뒤 복사하세요.');
+  const exBtn = el('button',{class:'btn primary',type:'button'}, '내보내기 (코드 복사)');
+  exBtn.addEventListener('click', ()=>{
+    const code = (cache && cache.sig === recSig()) ? cache.code : packPlain();
+    area.value = code; area.focus(); area.select(); try{ area.setSelectionRange(0, code.length); }catch(e){}
+    let copied = false; try{ copied = document.execCommand('copy'); }catch(e){}
+    const head = `단어 ${vocCount()}개, 오답 ${noteCount()}개를 코드에 담았어요. `;
+    msg.textContent = head + (copied ? '코드를 복사했어요. 받을 곳의 ‘가져오기’ 칸에 붙여 넣으세요.' : '위 코드 칸을 길게 눌러 전체 선택 → 복사한 뒤, 받을 곳에 붙여 넣으세요.');
+    if(!copied && navigator.clipboard && navigator.clipboard.writeText){
+      Promise.race([navigator.clipboard.writeText(code).then(() => true), new Promise(r => setTimeout(() => r(false), 1500))])
+        .then(ok => { if(ok) msg.textContent = head + '코드를 복사했어요. 받을 곳의 ‘가져오기’ 칸에 붙여 넣으세요.'; }).catch(()=>{});
+    }
   });
   const fileBtn = el('button',{class:'btn',type:'button'}, '파일로 저장');
   fileBtn.addEventListener('click', async ()=>{
-    const code = await packRecords();
+    const code = (cache && cache.sig === recSig()) ? cache.code : packPlain();
     const d = new Date(); const name = `mock10-기록-${d.getMonth()+1}월${d.getDate()}일.txt`;
     // Claude 안에서는 플랫폼의 저장 기능(downloads)을 쓰고, GitHub 등 일반 브라우저에서는 바로 내려받는다
     let dl = null;
     if(window.claude && typeof window.claude.use === 'function'){ try{ dl = await window.claude.use('downloads'); }catch(e){ dl = null; } }
     if(dl){
-      try{ await dl.save({filename: name, data: code}); msg.textContent = `‘${name}’ 파일로 저장했어요.`; }
-      catch(e){
-        area.value = code;
-        msg.textContent = (e && e.code === 'declined') ? '파일 저장을 취소했어요. 아래 코드를 복사해서 써도 돼요.' : '이 화면에서는 파일 저장이 안 돼요. 아래 코드를 복사해서 쓰세요.';
-      }
+      try{ await dl.save({filename: name, data: code}); msg.textContent = `‘${name}’ 파일로 저장했어요. 받을 곳에서 ‘파일에서 가져오기’로 고르세요.`; }
+      catch(e){ area.value = code; msg.textContent = (e && e.code === 'declined') ? '파일 저장을 취소했어요. 위 코드를 복사해서 써도 돼요.' : '이 화면에서는 파일 저장이 안 돼요. 위 코드를 복사해서 쓰세요.'; }
       return;
     }
     try{
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([code], {type:'text/plain'})); a.download = name;
       document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-      msg.textContent = `‘${name}’ 파일로 저장했어요. 저장이 안 됐다면 ‘내보내기’로 코드를 복사해 쓰세요.`;
-    }catch(e){ area.value = code; msg.textContent = '이 화면에서는 파일 저장이 막혀 있어요. 아래 코드를 복사해 쓰세요.'; }
+      msg.textContent = `‘${name}’ 파일로 저장했어요. 받을 곳에서 ‘파일에서 가져오기’로 고르세요.`;
+    }catch(e){ area.value = code; msg.textContent = '이 화면에서는 파일 저장이 막혀 있어요. 위 코드를 복사해 쓰세요.'; }
   });
   out.appendChild(exBtn); out.appendChild(fileBtn); box.appendChild(out);
-  box.appendChild(area);
+  box.appendChild(area); box.appendChild(msg);
+
+  box.appendChild(el('div',{class:'xstep'}, '② 받는 곳'));
+  box.appendChild(inArea);
   const inRow = el('div',{class:'xrow'});
   const imBtn = el('button',{class:'btn primary',type:'button'}, '가져오기');
   const fileIn = el('input',{type:'file',accept:'.txt,.json,text/plain',style:'display:none'});
   const fileInBtn = el('button',{class:'btn',type:'button'}, '파일에서 가져오기');
   const doImport = async code => {
+    if(!(code || '').trim()){ imsg.textContent = '가져올 코드가 비어 있어요. 보내는 곳에서 복사한 코드를 위 칸에 붙여 넣은 뒤 눌러 주세요.'; return; }
     try{
       const r = mergeRecords(await unpackRecords(code));
-      msg.textContent = `가져왔어요: 단어 ${r.va}개 추가(이미 있던 ${r.vs}개는 그대로), 오답 ${r.wa}개 추가(이미 있던 ${r.ws}개는 그대로).`;
-      area.value = '';
-      setTimeout(()=>{ const keep = msg.textContent; render(); const n = document.querySelector('.xmsg'); if(n){ n.textContent = keep; n.closest('details').open = true; } }, 50);
-    }catch(e){ msg.textContent = '가져오지 못했어요: ' + (e && e.message ? e.message : '코드를 확인해 주세요.'); }
+      const text = (r.va || r.wa)
+        ? `가져왔어요! 단어 ${r.va}개, 오답 ${r.wa}개를 새로 더했어요.` + ((r.vs || r.ws) ? ` (이미 있던 단어 ${r.vs}개·오답 ${r.ws}개는 그대로 두었어요)` : '')
+        : `새로 더할 기록이 없어요. 이 코드에 든 단어 ${r.vs}개·오답 ${r.ws}개가 여기에 이미 모두 있어요. 같은 페이지에서 내보내고 바로 가져오면 이렇게 나와요 — 코드는 다른 기기나 다른 페이지(Claude ↔ GitHub)에서 가져오세요.`;
+      inArea.value = '';
+      render();
+      const n = document.querySelector('.xmsg-in'); if(n){ n.textContent = text; const dd = n.closest('details'); if(dd) dd.open = true; n.scrollIntoView({block:'center'}); }
+    }catch(e){ imsg.textContent = '가져오지 못했어요: ' + (e && e.message ? e.message : '코드를 확인해 주세요.'); }
   };
-  imBtn.addEventListener('click', ()=> doImport(area.value));
+  imBtn.addEventListener('click', ()=> doImport(inArea.value));
   fileInBtn.addEventListener('click', ()=> fileIn.click());
   fileIn.addEventListener('change', async ()=>{ const f = fileIn.files && fileIn.files[0]; if(f) doImport(await f.text()); fileIn.value = ''; });
   inRow.appendChild(imBtn); inRow.appendChild(fileInBtn); inRow.appendChild(fileIn); box.appendChild(inRow);
-  box.appendChild(msg);
+  box.appendChild(imsg);
   m.appendChild(box);
 }
 
