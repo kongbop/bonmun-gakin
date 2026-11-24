@@ -490,6 +490,17 @@ function renderTransfer(m){
   fileBtn.addEventListener('click', async ()=>{
     const code = await packRecords();
     const d = new Date(); const name = `mock10-기록-${d.getMonth()+1}월${d.getDate()}일.txt`;
+    // Claude 안에서는 플랫폼의 저장 기능(downloads)을 쓰고, GitHub 등 일반 브라우저에서는 바로 내려받는다
+    let dl = null;
+    if(window.claude && typeof window.claude.use === 'function'){ try{ dl = await window.claude.use('downloads'); }catch(e){ dl = null; } }
+    if(dl){
+      try{ await dl.save({filename: name, data: code}); msg.textContent = `‘${name}’ 파일로 저장했어요.`; }
+      catch(e){
+        area.value = code;
+        msg.textContent = (e && e.code === 'declined') ? '파일 저장을 취소했어요. 아래 코드를 복사해서 써도 돼요.' : '이 화면에서는 파일 저장이 안 돼요. 아래 코드를 복사해서 쓰세요.';
+      }
+      return;
+    }
     try{
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([code], {type:'text/plain'})); a.download = name;
       document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
