@@ -1178,13 +1178,21 @@ const FC = (() => { let s = {}; try{ s = JSON.parse(localStorage.getItem('mock10
   const o = Object.assign({from: DATA[0].key, to: DATA[DATA.length-1].key, size:20, only:'all', front:'en', shuffle:true, say:false}, s.opt || {});
   // 예전 설정(지문 하나 고르기)은 같은 지문부터 같은 지문까지로 바꾼다
   if(o.scope){ if(o.scope !== 'all' && DATA.some(p => p.key === o.scope)){ o.from = o.scope; o.to = o.scope; } delete o.scope; }
-  return {on:false, opt: o, sess: null}; })();
+  // 하다 만 카드(구간·라운드·몇 번째 장인지)는 이 기기에 남겨 두었다가 ‘이어서 하기’로 다시 연다
+  const sv = s.saved && Array.isArray(s.saved.queue) && Array.isArray(s.saved.ids) ? s.saved : null;
+  return {on:false, opt: o, sess: null, saved: sv}; })();
 // 범위: from 지문부터 to 지문까지 (지문 순서 기준, 거꾸로 골라도 같은 범위)
 const fcIdx = k => DATA.findIndex(p => p.key === k);
 function fcRange(){ let a = fcIdx(FC.opt.from), b = fcIdx(FC.opt.to); if(a < 0) a = 0; if(b < 0) b = DATA.length - 1; return a <= b ? [a, b] : [b, a]; }
 const fcIn = it => { const [a, b] = fcRange(); const i = fcIdx(it.k); return i >= a && i <= b; };
 const fcRangeLabel = () => { const [a, b] = fcRange(); const n = i => DATA[i].key.replace('-','~') + '번'; return a === 0 && b === DATA.length - 1 ? '전체 지문' : a === b ? n(a) + ' 지문' : `${n(a)} ~ ${n(b)} 지문`; };
-const fcSave = () => { try{ localStorage.setItem('mock10-fc', JSON.stringify({opt: FC.opt})); }catch(e){} };
+const fcSave = () => { try{ localStorage.setItem('mock10-fc', JSON.stringify({opt: FC.opt, saved: FC.saved})); }catch(e){} };
+// 지금 하는 카드를 ‘이어서 하기’용으로 남긴다. 구간을 다 외워 끝났으면 남기지 않는다.
+function fcKeep(){
+  const S = FC.sess;
+  if(S){ const finished = S.done && !S.unknown.length; FC.saved = finished ? null : JSON.parse(JSON.stringify(Object.assign({}, S, {busy:false, open:false, saidFor:null}))); }
+  fcSave();
+}
 const FC_CAN_SAY = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
 function fcSay(word){
   if(!FC_CAN_SAY) return;
@@ -1207,6 +1215,7 @@ function fcStart(sec, fixed){
   sec = Math.max(0, Math.min(sec, secs.length - 1));
   const ids = secs[sec];
   FC.sess = {label: fcRangeLabel(), secs, sec, secN: secs.length, ids, round:1, queue: FC.opt.shuffle ? shuffle(ids) : ids.slice(), i:0, known:[], unknown:[], open:false, hist:[], done:false};
+  fcKeep();
 }
 function fcAnswer(know){
   const S = FC.sess; if(!S || S.done) return;
@@ -1216,6 +1225,7 @@ function fcAnswer(know){
   (know ? S.known : S.unknown).push(id);
   S.i++; S.open = false; S.saidFor = null;
   if(S.i >= S.queue.length) S.done = true;
+  fcKeep();
 }
 function fcUndo(){
   const S = FC.sess; if(!S || !S.hist.length) return;
@@ -1223,8 +1233,9 @@ function fcUndo(){
   if(it){ if(h.prev === undefined) delete it.fc; else it.fc = h.prev; it.fcn = Math.max(0, (it.fcn || 1) - 1); persistVoc(); }
   const arr = h.know ? S.known : S.unknown; const k = arr.lastIndexOf(h.id); if(k >= 0) arr.splice(k, 1);
   S.done = false; S.i = Math.max(0, S.i - 1); S.open = false;
+  fcKeep();
 }
-function fcNextRound(){ const S = FC.sess; S.saidFor = null; S.round++; S.queue = FC.opt.shuffle ? shuffle(S.unknown) : S.unknown.slice(); S.unknown = []; S.i = 0; S.done = false; S.open = false; S.hist = []; }
+function fcNextRound(){ const S = FC.sess; S.saidFor = null; S.round++; S.queue = FC.opt.shuffle ? shuffle(S.unknown) : S.unknown.slice(); S.unknown = []; S.i = 0; S.done = false; S.open = false; S.hist = []; fcKeep(); }
 const fcMarkEx = (ex, words) => { let h = esc(ex); for(const w of words){ if(!w) continue; const re = new RegExp('(^|[^A-Za-z])(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?=[^A-Za-z]|$)', 'i'); if(re.test(h)){ h = h.replace(re, '$1<mark>$2</mark>'); break; } } return h; };
 
 // 알아요/몰라요가 어디까지 저장됐는지 카드 화면 위에 보여 준다
@@ -1333,7 +1344,7 @@ function renderFlashDone(m, S){
     const row = el('div',{class:'seg',style:'justify-content:center'});
     if(S.sec < S.secN - 1){ const nx = el('button',{class:'btn primary',type:'button'}, `다음 구간 (제 ${S.sec+2}구간) →`); nx.addEventListener('click', ()=>{ fcStart(S.sec + 1, S.secs); render(); window.scrollTo(0,0); }); row.appendChild(nx); }
     const re = el('button',{class:'btn',type:'button'}, '이 구간 다시'); re.addEventListener('click', ()=>{ fcStart(S.sec, S.secs); render(); }); row.appendChild(re);
-    const fin = el('button',{class:'btn',type:'button'}, '끝내기'); fin.addEventListener('click', ()=>{ FC.on = false; FC.sess = null; render(); window.scrollTo(0,0); }); row.appendChild(fin);
+    const fin = el('button',{class:'btn',type:'button'}, '끝내기'); fin.addEventListener('click', ()=>{ FC.on = false; FC.sess = null; FC.saved = null; fcSave(); render(); window.scrollTo(0,0); }); row.appendChild(fin);
     d.appendChild(row);
   }
   if(S.hist.length){ const u = el('button',{class:'btn sm',type:'button',style:'justify-self:center'}, '↶ 마지막 카드 되돌리기'); u.addEventListener('click', ()=>{ fcUndo(); render(); }); d.appendChild(u); }
@@ -1378,6 +1389,35 @@ function renderFlashSetup(m){
   const all = Object.values(VOC.items).filter(fcIn);
   const okN = all.filter(it => it.fc === 1).length, noN = all.filter(it => it.fc === 0).length;
   m.appendChild(el('p',{class:'hint'}, `${fcRangeLabel()} 단어 ${all.length}개 중 알아요 ${okN}개 · 몰라요 ${noN}개 · 아직 안 본 카드 ${all.length - okN - noN}개`));
+  // 알아요/몰라요 기록 초기화 (지금 고른 범위만, 두 번 눌러야 지워짐)
+  if(okN + noN){
+    const rs = el('button',{class:'btn sm',type:'button'}, `이 범위 알아요/몰라요 기록 초기화 (${okN + noN}개)`);
+    let armed = false, tm = null;
+    rs.addEventListener('click', ()=>{
+      if(!armed){ armed = true; rs.textContent = '정말 지울까요? 한 번 더 누르면 지워져요'; rs.classList.add('fc-no'); tm = setTimeout(()=>{ armed = false; rs.textContent = `이 범위 알아요/몰라요 기록 초기화 (${okN + noN}개)`; rs.classList.remove('fc-no'); }, 4000); return; }
+      clearTimeout(tm);
+      const now = Date.now(); let n = 0;
+      // 지운 시각(fct)을 남겨 두어야 다른 기기·가져오기의 옛 기록이 되살아나지 않는다
+      Object.values(VOC.items).forEach(it => { if(fcIn(it) && (it.fc === 0 || it.fc === 1 || it.fcn)){ it.fc = null; it.fcn = 0; it.fct = now; n++; } });
+      FC.saved = null; fcSave(); persistVoc(); render();
+      showToast(`<div class="trow"><span>${esc(fcRangeLabel())}의 알아요/몰라요 기록 ${n}개를 지웠어요. 단어는 단어장에 그대로 있어요.</span><button class="x" data-close aria-label="닫기">×</button></div>`);
+    });
+    m.appendChild(rs);
+  }
+  // 하다 만 카드가 있으면 이어서 하기
+  const sv = FC.saved;
+  if(sv){
+    const left = sv.done ? 0 : sv.queue.length - sv.i;
+    const box2 = el('div',{class:'fc-done',style:'margin:12px 0;padding:14px;text-align:left;gap:8px'});
+    box2.appendChild(el('div',{}, `<b>하다 만 카드가 있어요</b><br><span class="srcl">${esc(sv.label)} · 제 ${sv.sec+1}구간 · ${sv.round}라운드 · ${sv.done ? '라운드 끝(모르는 카드 남음)' : `${sv.i}/${sv.queue.length}장 넘김, ${left}장 남음`}</span>`));
+    const r2 = el('div',{class:'seg'});
+    const go = el('button',{class:'btn primary',type:'button'}, '이어서 하기');
+    go.addEventListener('click', ()=>{ FC.sess = JSON.parse(JSON.stringify(sv)); render(); window.scrollTo(0,0); });
+    const drop = el('button',{class:'btn',type:'button'}, '버리기');
+    drop.addEventListener('click', ()=>{ FC.saved = null; fcSave(); render(); });
+    r2.appendChild(go); r2.appendChild(drop); box2.appendChild(r2);
+    m.appendChild(box2);
+  }
   if(!pool.length){ m.appendChild(el('div',{class:'gist'}, FC.opt.only === 'left' ? '이 범위의 카드를 모두 외웠어요! ‘전체 카드’로 바꾸면 다시 볼 수 있어요.' : '이 범위에 카드가 없어요.')); return; }
   const list = el('div',{class:'seg'});
   secs.forEach((ids, i) => {
@@ -1386,7 +1426,7 @@ function renderFlashSetup(m){
     list.appendChild(b);
   });
   m.appendChild(list);
-  m.appendChild(el('p',{class:'fc-tip',style:'text-align:left'}, '알아요/몰라요로 나누면, 다음 라운드에는 몰라요 카드만 다시 나와요. 모두 알아요가 되면 그 구간이 끝나요. 알아요·몰라요 기록은 단어장에 함께 저장돼요.'));
+  m.appendChild(el('p',{class:'fc-tip',style:'text-align:left'}, '알아요/몰라요로 나누면, 다음 라운드에는 몰라요 카드만 다시 나와요. 모두 알아요가 되면 그 구간이 끝나요. 알아요·몰라요는 누를 때마다 바로 저장돼요. 중간에 나가도 ‘이어서 하기’로 하던 곳부터 다시 할 수 있어요.'));
 }
 document.addEventListener('keydown', e => {
   if(!(st.mode === 'voc' && FC.on && FC.sess && !FC.sess.done)) return;
