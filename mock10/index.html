@@ -195,6 +195,8 @@ footer{margin-top:24px;font-size:.82rem;color:var(--muted)}
 .fcset .lab{font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:4px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .seg .btn{padding:6px 11px;font-size:.88rem}
+.fcrange{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fcrange span{font-size:.9rem}
 .fcset select{font:inherit;padding:6px 8px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink);max-width:100%}
 .fctop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 8px;font-size:.9rem}
 .fctop .grow{flex:1}
@@ -1099,7 +1101,15 @@ function renderVocab(p, b){
 // ───── 플래시카드 암기 (클래스카드 암기학습 방식) ─────
 // 한 구간의 카드를 넘기며 알아요/몰라요로 나누고, 다음 라운드에는 몰라요 카드만 다시 나온다. 모두 알면 구간 끝.
 const FC = (() => { let s = {}; try{ s = JSON.parse(localStorage.getItem('mock10-fc') || '{}'); }catch(e){}
-  return {on:false, opt: Object.assign({scope:'all', size:20, only:'all', front:'en', shuffle:true, say:false}, s.opt || {}), sess: null}; })();
+  const o = Object.assign({from: DATA[0].key, to: DATA[DATA.length-1].key, size:20, only:'all', front:'en', shuffle:true, say:false}, s.opt || {});
+  // 예전 설정(지문 하나 고르기)은 같은 지문부터 같은 지문까지로 바꾼다
+  if(o.scope){ if(o.scope !== 'all' && DATA.some(p => p.key === o.scope)){ o.from = o.scope; o.to = o.scope; } delete o.scope; }
+  return {on:false, opt: o, sess: null}; })();
+// 범위: from 지문부터 to 지문까지 (지문 순서 기준, 거꾸로 골라도 같은 범위)
+const fcIdx = k => DATA.findIndex(p => p.key === k);
+function fcRange(){ let a = fcIdx(FC.opt.from), b = fcIdx(FC.opt.to); if(a < 0) a = 0; if(b < 0) b = DATA.length - 1; return a <= b ? [a, b] : [b, a]; }
+const fcIn = it => { const [a, b] = fcRange(); const i = fcIdx(it.k); return i >= a && i <= b; };
+const fcRangeLabel = () => { const [a, b] = fcRange(); const n = i => DATA[i].key.replace('-','~') + '번'; return a === 0 && b === DATA.length - 1 ? '전체 지문' : a === b ? n(a) + ' 지문' : `${n(a)} ~ ${n(b)} 지문`; };
 const fcSave = () => { try{ localStorage.setItem('mock10-fc', JSON.stringify({opt: FC.opt})); }catch(e){} };
 const FC_CAN_SAY = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
 function fcSay(word){
@@ -1111,7 +1121,7 @@ function fcSay(word){
 function fcPool(){
   const order = {}; DATA.forEach((p,i) => order[p.key] = i);
   return Object.entries(VOC.items)
-    .filter(([id,it]) => FC.opt.scope === 'all' || it.k === FC.opt.scope)
+    .filter(([id,it]) => fcIn(it))
     .filter(([id,it]) => FC.opt.only === 'all' || it.fc !== 1)
     .sort((a,b) => (order[a[1].k] - order[b[1].k]) || (a[1].t - b[1].t))
     .map(([id]) => id);
@@ -1121,7 +1131,7 @@ function fcStart(sec){
   const secs = fcSections(fcPool()); if(!secs.length) return;
   sec = Math.max(0, Math.min(sec, secs.length - 1));
   const ids = secs[sec];
-  FC.sess = {sec, secN: secs.length, ids, round:1, queue: FC.opt.shuffle ? shuffle(ids) : ids.slice(), i:0, known:[], unknown:[], open:false, hist:[], done:false};
+  FC.sess = {label: fcRangeLabel(), sec, secN: secs.length, ids, round:1, queue: FC.opt.shuffle ? shuffle(ids) : ids.slice(), i:0, known:[], unknown:[], open:false, hist:[], done:false};
 }
 function fcAnswer(know){
   const S = FC.sess; if(!S || S.done) return;
@@ -1158,7 +1168,7 @@ function renderFlash(m){
   reset.addEventListener('click', ()=>{ FC.sess = null; render(); });
   top.appendChild(reset);
   // 구간 정보
-  m.appendChild(el('div',{class:'fctop',style:'margin-top:0'}, `<span class="grow"><b>제 ${S.sec+1}구간</b> <span class="srcl">(전체 ${S.secN}구간 · 이 구간 ${S.ids.length}장)</span></span><b>${S.round}라운드</b>`));
+  m.appendChild(el('div',{class:'fctop',style:'margin-top:0'}, `<span class="grow"><b>제 ${S.sec+1}구간</b> <span class="srcl">(${esc(S.label)} · 전체 ${S.secN}구간 · 이 구간 ${S.ids.length}장)</span></span><b>${S.round}라운드</b>`));
   if(S.done){ renderFlashDone(m, S); return; }
   const id = S.queue[S.i]; const it = VOC.items[id];
   if(!it){ S.i++; if(S.i >= S.queue.length) S.done = true; render(); return; }
@@ -1256,15 +1266,27 @@ function renderFlashSetup(m){
     opts.forEach(([v, t]) => { const b = el('button',{class:'btn'+(FC.opt[key] === v ? ' on' : ''),type:'button','aria-pressed':String(FC.opt[key] === v)}, t); b.addEventListener('click', ()=>{ FC.opt[key] = v; fcSave(); render(); }); r.appendChild(b); });
     w.appendChild(r); return w;
   };
-  // 범위: 전체 또는 지문별 (단어가 있는 지문만)
-  const keys = DATA.map(p => p.key).filter(k => Object.values(VOC.items).some(it => it.k === k));
-  if(FC.opt.scope !== 'all' && !keys.includes(FC.opt.scope)) FC.opt.scope = 'all';
-  const sw = el('div'); sw.appendChild(el('div',{class:'lab'}, '범위'));
-  const sel = el('select',{'aria-label':'범위'});
-  sel.appendChild(el('option',{value:'all'}, `내 단어장 전체 (${vocCount()}개)`));
-  keys.forEach(k => { const n = Object.values(VOC.items).filter(it => it.k === k).length; const o = el('option',{value:k}, `${k.replace('-','~')}번 지문 (${n}개)`); sel.appendChild(o); });
-  sel.value = FC.opt.scope; sel.addEventListener('change', ()=>{ FC.opt.scope = sel.value; fcSave(); render(); });
-  sw.appendChild(sel); box.appendChild(sw);
+  // 범위: ○번 지문부터 ○번 지문까지
+  const cnt = k => Object.values(VOC.items).filter(it => it.k === k).length;
+  const sw = el('div'); sw.appendChild(el('div',{class:'lab'}, '단어 범위'));
+  const row = el('div',{class:'fcrange'});
+  const mk = (key, label) => {
+    const s = el('select',{'aria-label':label});
+    DATA.forEach(p => s.appendChild(el('option',{value:p.key}, `${p.key.replace('-','~')}번 (${cnt(p.key)}개)`)));
+    s.value = FC.opt[key]; if(s.value !== FC.opt[key]) s.selectedIndex = key === 'from' ? 0 : DATA.length - 1;
+    s.addEventListener('change', ()=>{ FC.opt[key] = s.value; fcSave(); render(); });
+    return s;
+  };
+  row.appendChild(mk('from', '시작 지문')); row.appendChild(el('span',{}, '부터'));
+  row.appendChild(mk('to', '끝 지문')); row.appendChild(el('span',{}, '까지'));
+  sw.appendChild(row);
+  const quick = el('div',{class:'seg',style:'margin-top:6px'});
+  const [ra, rb] = fcRange(); const isAll = ra === 0 && rb === DATA.length - 1;
+  const allB = el('button',{class:'btn sm'+(isAll ? ' on' : ''),type:'button'}, `전체 지문 (${vocCount()}개)`);
+  allB.addEventListener('click', ()=>{ FC.opt.from = DATA[0].key; FC.opt.to = DATA[DATA.length-1].key; fcSave(); render(); });
+  quick.appendChild(allB);
+  sw.appendChild(quick);
+  box.appendChild(sw);
   box.appendChild(seg('카드', 'only', [['all','전체 카드'],['left','아직 못 외운 카드만']]));
   box.appendChild(seg('앞면', 'front', [['en','영어 → 뜻'],['ko','뜻 → 영어']]));
   box.appendChild(seg('구간 크기', 'size', [[10,'10장'],[20,'20장'],[30,'30장'],[0,'한 번에 전부']]));
@@ -1272,9 +1294,9 @@ function renderFlashSetup(m){
   if(FC_CAN_SAY) box.appendChild(seg('발음 자동 재생', 'say', [[false,'끄기'],[true,'켜기']]));
   m.appendChild(box);
   const pool = fcPool(); const secs = fcSections(pool);
-  const all = Object.values(VOC.items).filter(it => FC.opt.scope === 'all' || it.k === FC.opt.scope);
+  const all = Object.values(VOC.items).filter(fcIn);
   const okN = all.filter(it => it.fc === 1).length, noN = all.filter(it => it.fc === 0).length;
-  m.appendChild(el('p',{class:'hint'}, `이 범위 ${all.length}개 중 알아요 ${okN}개 · 몰라요 ${noN}개 · 아직 안 본 카드 ${all.length - okN - noN}개`));
+  m.appendChild(el('p',{class:'hint'}, `${fcRangeLabel()} 단어 ${all.length}개 중 알아요 ${okN}개 · 몰라요 ${noN}개 · 아직 안 본 카드 ${all.length - okN - noN}개`));
   if(!pool.length){ m.appendChild(el('div',{class:'gist'}, FC.opt.only === 'left' ? '이 범위의 카드를 모두 외웠어요! ‘전체 카드’로 바꾸면 다시 볼 수 있어요.' : '이 범위에 카드가 없어요.')); return; }
   const list = el('div',{class:'seg'});
   secs.forEach((ids, i) => {
