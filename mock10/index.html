@@ -378,23 +378,65 @@ DATA.forEach((p, pi)=>{
   p.variants.forEach(g => g.qs.forEach(q => add(Object.assign({}, q, {id: q.id || ('v-'+q.src.replace(/Step 0(\d) (\d+)번/,'S$1-$2')), pi, key:p.key, ctx:g}))));
 });
 
-// ---------- wrong-answer notes: account storage (db) with browser fallback ----------
-const NOTE = {items:{}, where:'browser'};
-let noteDoc = null, writing = false, pendingWrite = false;
-try{ NOTE.items = JSON.parse(localStorage.getItem('mock10-wrong') || '{}') || {}; }catch(e){ NOTE.items = {}; }
-async function writeNote(){
-  if(!noteDoc) return;
-  if(writing){ pendingWrite = true; return; }
-  writing = true;
-  try{ await noteDoc.set({items: NOTE.items, updated: Date.now()}); }
-  catch(e){ noteDoc = null; NOTE.where = 'browser'; updateBadge(); }
-  writing = false;
-  if(pendingWrite){ pendingWrite = false; writeNote(); }
+// ---------- 계정 저장(db) + 이 브라우저 저장: 저장이 한 번 실패해도 기록을 잃지 않게 ----------
+// 바뀔 때마다 이 브라우저에 바로 저장하고 '마지막으로 바꾼 시각'을 적어 둔다.
+// 계정 저장은 잠깐 모았다가 한 번에 보내고, 실패하면 포기하지 않고 간격을 늘려 다시 보낸다.
+// 다시 열 때 계정에 못 올라간 기록이 이 브라우저에 남아 있으면, 계정 것으로 덮지 않고 합친다.
+function makeStore(lsKey, merge){
+  const S = {items:{}, where:'browser', doc:null, busy:false, again:false, timer:null, retry:0, err:false, merge, pack:null, unpack:null, onState:null};
+  try{ S.items = JSON.parse(localStorage.getItem(lsKey) || '{}') || {}; }catch(e){ S.items = {}; }
+  const num = k => { try{ return +localStorage.getItem(lsKey + k) || 0; }catch(e){ return 0; } };
+  const setNum = (k, v) => { try{ localStorage.setItem(lsKey + k, String(v)); }catch(e){} };
+  const hasMeta = () => { try{ return localStorage.getItem(lsKey + '-at') !== null; }catch(e){ return false; } };
+  S.localAt = () => num('-at'); S.syncAt = () => num('-sync');
+  S.unsynced = () => S.localAt() > S.syncAt();
+  S.saveLocal = changed => { try{ localStorage.setItem(lsKey, JSON.stringify(S.items)); }catch(e){} if(changed) setNum('-at', Math.max(Date.now(), S.localAt() + 1)); };
+  S.state = () => !S.doc ? 'browser' : S.err ? 'retry' : (S.busy || S.timer) ? 'saving' : 'saved';
+  const tell = () => { if(S.onState) try{ S.onState(S.state()); }catch(e){} };
+  S.push = (delay = 700) => { if(!S.doc) return; clearTimeout(S.timer); S.timer = setTimeout(S.flush, delay); tell(); };
+  S.flush = async () => {
+    clearTimeout(S.timer); S.timer = null;
+    if(!S.doc) return;
+    if(S.busy){ S.again = true; return; }
+    S.busy = true; tell();
+    const covered = S.localAt(), at = Date.now();
+    try{
+      await S.doc.set({items: S.pack ? S.pack(S.items) : S.items, updated: at});
+      setNum('-sync', covered); S.err = false; S.retry = 0;
+    }catch(e){
+      S.err = true; S.retry++;
+      S.busy = false; S.push(Math.min(30000, 2000 * Math.pow(2, S.retry - 1)));
+      return;
+    }
+    S.busy = false;
+    if(S.again || S.unsynced()){ S.again = false; S.push(300); } else tell();
+  };
+  S.change = () => { S.saveLocal(true); S.push(); };
+  S.load = async doc => {
+    const snap = await doc.get();
+    S.doc = doc; S.where = 'account';
+    const local = S.items, hasLocal = Object.keys(local).length > 0;
+    if(!snap.exists){ if(hasLocal){ S.saveLocal(true); S.push(0); } return; }
+    const d = snap.data() || {}; let remote = Object.assign({}, d.items || {}); if(S.unpack) remote = S.unpack(remote);
+    const rAt = +d.updated || 0;
+    if(S.unsynced() && S.localAt() >= rAt){ S.items = local; S.saveLocal(true); S.push(0); return; }   // 이 브라우저가 가장 최근: 그대로 올린다
+    if(S.unsynced() || (!hasMeta() && hasLocal)){                                                   // 못 올라간 기록이 있다: 합친다
+      S.items = S.merge(remote, local);
+      if(JSON.stringify(S.items) !== JSON.stringify(remote)){ S.saveLocal(true); S.push(0); return; }
+    } else S.items = remote;                                                                       // 계정 것이 최신
+    S.saveLocal(false); setNum('-at', rAt || 1); setNum('-sync', rAt || 1);
+  };
+  return S;
 }
-function persistNote(){
-  try{ localStorage.setItem('mock10-wrong', JSON.stringify(NOTE.items)); }catch(e){}
-  writeNote(); updateBadge();
-}
+const newer = (a, b, f) => (a && a[f] || 0) > (b && b[f] || 0);
+
+// ---------- wrong-answer notes ----------
+const NOTE = makeStore('mock10-wrong', (remote, local) => {
+  const out = Object.assign({}, remote);
+  for(const id in local){ if(!out[id] || newer(local[id], out[id], 't')) out[id] = local[id]; }
+  return out;
+});
+function persistNote(){ NOTE.change(); updateBadge(); }
 function recordResult(id, ok){
   const it = NOTE.items[id];
   if(!ok){ NOTE.items[id] = {n:(it ? it.n : 0) + 1, s:0, t:Date.now()}; persistNote(); }
@@ -402,6 +444,23 @@ function recordResult(id, ok){
 }
 function noteCount(){ return Object.keys(NOTE.items).filter(id => BYID[id]).length; }
 function updateBadge(){ const b = document.getElementById('wrong-badge'); if(b) b.textContent = noteCount(); }
+
+// ---------- my vocabulary ----------
+const VOC = makeStore('mock10-vocab', (remote, local) => {
+  const out = Object.assign({}, remote);
+  for(const id in local){
+    const L = local[id], R = out[id];
+    if(!R){ out[id] = L; continue; }                       // 계정에 못 올라간 단어
+    if(newer(L, R, 'fct')) out[id] = Object.assign({}, R, {fc: L.fc, fcn: L.fcn, fct: L.fct});   // 더 최근 알아요/몰라요 기록
+  }
+  return out;
+});
+// 계정에는 본문 문장을 통째로 넣지 않고 문장 번호만 넣어 크기를 줄인다 (이 브라우저와 기록 옮기기는 그대로)
+const SENT_IX = {}; DATA.forEach(p => { const m = new Map(); p.sents.forEach((s, i) => m.set(s.en, i)); SENT_IX[p.key] = m; });
+VOC.pack = items => { const o = {}; for(const id in items){ const it = items[id]; const ix = it.ex && SENT_IX[it.k] ? SENT_IX[it.k].get(it.ex) : undefined; if(ix !== undefined){ const c = Object.assign({}, it, {xi: ix}); delete c.ex; o[id] = c; } else o[id] = it; } return o; };
+VOC.unpack = items => { const o = {}; for(const id in items){ const it = items[id]; if(it && it.xi !== undefined && !it.ex){ const p = DATA.find(x => x.key === it.k); const c = Object.assign({}, it); delete c.xi; c.ex = p && p.sents[it.xi] ? p.sents[it.xi].en : ''; o[id] = c; } else o[id] = it; } return o; };
+function persistVoc(){ VOC.change(); updateVocBadge(); }
+
 (async ()=>{
   try{
     if(!(window.claude && typeof window.claude.use === 'function')) return;
@@ -409,38 +468,17 @@ function updateBadge(){ const b = document.getElementById('wrong-badge'); if(b) 
     if(!db || !user) return;
     const uid = await user.id();
     if(!uid) return;
-    const ref = db.doc('data/users/' + uid + '/wrongnote');
-    const snap = await ref.get();
-    noteDoc = ref; NOTE.where = 'account';
-    if(snap.exists){ const d = snap.data(); NOTE.items = Object.assign({}, (d && d.items) || {}); try{ localStorage.setItem('mock10-wrong', JSON.stringify(NOTE.items)); }catch(e){} }
-    else if(Object.keys(NOTE.items).length){ writeNote(); }
+    try{ await NOTE.load(db.doc('data/users/' + uid + '/wrongnote')); }catch(e){ NOTE.doc = null; NOTE.where = 'browser'; }
     updateBadge();
-    try{
-      const vref = db.doc('data/users/' + uid + '/myvocab');
-      const vs = await vref.get();
-      vocDoc = vref; VOC.where = 'account';
-      if(vs.exists){ const d = vs.data(); VOC.items = Object.assign({}, (d && d.items) || {}); const mg = migrateVoc(); try{ localStorage.setItem('mock10-vocab', JSON.stringify(VOC.items)); }catch(e){} if(mg) writeVoc(); }
-      else if(Object.keys(VOC.items).length){ writeVoc(); }
-      updateVocBadge();
-    }catch(e){ vocDoc = null; VOC.where = 'browser'; }
+    try{ await VOC.load(db.doc('data/users/' + uid + '/myvocab')); if(migrateVoc()) persistVoc(); }catch(e){ VOC.doc = null; VOC.where = 'browser'; }
+    updateVocBadge();
     if(st.mode === 'wrong' || st.mode === 'voc' || st.tab === 'text' || st.tab === 'vocab') render();
-  }catch(e){ noteDoc = null; NOTE.where = 'browser'; }
+  }catch(e){}
 })();
-
-// ---------- my vocabulary: account storage (db) with browser fallback ----------
-const VOC = {items:{}, where:'browser'};
-let vocDoc = null, vWriting = false, vPending = false;
-try{ VOC.items = JSON.parse(localStorage.getItem('mock10-vocab') || '{}') || {}; }catch(e){ VOC.items = {}; }
-async function writeVoc(){
-  if(!vocDoc) return;
-  if(vWriting){ vPending = true; return; }
-  vWriting = true;
-  try{ await vocDoc.set({items: VOC.items, updated: Date.now()}); }
-  catch(e){ vocDoc = null; VOC.where = 'browser'; }
-  vWriting = false;
-  if(vPending){ vPending = false; writeVoc(); }
-}
-function persistVoc(){ try{ localStorage.setItem('mock10-vocab', JSON.stringify(VOC.items)); }catch(e){} writeVoc(); updateVocBadge(); }
+// 화면을 닫거나 다른 앱으로 갈 때, 모아 둔 저장을 바로 보낸다
+const flushAll = () => { [NOTE, VOC].forEach(S => { if(S.doc && (S.timer || S.unsynced())) S.flush(); }); };
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') flushAll(); });
+window.addEventListener('pagehide', flushAll);
 const vocId = (key, head) => key + '|' + head.toLowerCase().replace(/[’]/g, "'");
 function vocCount(){ return Object.keys(VOC.items).length; }
 function updateVocBadge(){ const b = document.getElementById('voc-badge'); if(b) b.textContent = vocCount(); }
@@ -1152,6 +1190,10 @@ function fcUndo(){
 function fcNextRound(){ const S = FC.sess; S.round++; S.queue = FC.opt.shuffle ? shuffle(S.unknown) : S.unknown.slice(); S.unknown = []; S.i = 0; S.done = false; S.open = false; S.hist = []; }
 const fcMarkEx = (ex, words) => { let h = esc(ex); for(const w of words){ if(!w) continue; const re = new RegExp('(^|[^A-Za-z])(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?=[^A-Za-z]|$)', 'i'); if(re.test(h)){ h = h.replace(re, '$1<mark>$2</mark>'); break; } } return h; };
 
+// 알아요/몰라요가 어디까지 저장됐는지 카드 화면 위에 보여 준다
+const FC_SAVE_TEXT = {saved:'✓ 계정에 저장됨', saving:'저장 중…', retry:'계정 저장을 다시 시도하는 중 (기록은 이 기기에 있어요)', browser:'이 브라우저에 저장됨'};
+function fcSaveState(){ const e = document.getElementById('fc-save'); if(e) e.textContent = FC_SAVE_TEXT[VOC.state()] || ''; }
+VOC.onState = fcSaveState;
 function renderFlash(m){
   const top = el('div',{class:'fctop'});
   const back = el('button',{class:'btn sm',type:'button'}, '← 단어장 목록');
@@ -1163,7 +1205,9 @@ function renderFlash(m){
   const tt = document.getElementById('toast'); if(tt){ clearTimeout(showToast.tm); clearTimeout(showToast.tm2); tt.remove(); }
   const S = FC.sess;
   if(!S){ renderFlashSetup(m); return; }
+  setTimeout(fcSaveState, 0);
   top.appendChild(el('span',{class:'grow'}));
+  top.appendChild(el('span',{id:'fc-save',class:'srcl'}));
   const reset = el('button',{class:'btn sm',type:'button'}, '설정 바꾸기');
   reset.addEventListener('click', ()=>{ FC.sess = null; render(); });
   top.appendChild(reset);
