@@ -190,7 +190,42 @@ footer{margin-top:24px;font-size:.82rem;color:var(--muted)}
 .xfer{margin:10px 0 16px;border:1px solid var(--rule);border-radius:12px;padding:10px 14px;background:var(--card,#fff)}
 .xfer summary{cursor:pointer;font-weight:600;font-size:.92rem}
 .xstep{font-weight:700;font-size:.85rem;margin-top:10px;color:var(--accent)}
-.xmsg{margin-top:8px;padding:8px 10px;border-radius:8px;background:#eef3ff;color:#1f3a8a;font-size:.88rem;line-height:1.45}
+.xmsg{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:.88rem;line-height:1.45}
+.fcset{border:1px solid var(--rule);border-radius:12px;padding:12px 14px;background:var(--sheet);display:grid;gap:10px;margin:10px 0 16px}
+.fcset .lab{font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg .btn{padding:6px 11px;font-size:.88rem}
+.fcset select{font:inherit;padding:6px 8px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink);max-width:100%}
+.fctop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 8px;font-size:.9rem}
+.fctop .grow{flex:1}
+.fcbar{height:6px;border-radius:3px;background:var(--rule);overflow:hidden;margin-bottom:12px}
+.fcbar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.fc-card{position:relative;border:1px solid var(--rule);border-radius:16px;background:var(--sheet);box-shadow:0 2px 10px rgba(0,0,0,.06);min-height:300px;display:flex;flex-direction:column;touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:transform .18s, opacity .18s}
+.fc-card.out-r{transform:translateX(60%) rotate(6deg);opacity:0}
+.fc-card.out-l{transform:translateX(-60%) rotate(-6deg);opacity:0}
+.fc-front{padding:26px 18px 14px;text-align:center;display:grid;gap:6px;justify-items:center}
+.fc-w{font-family:var(--font-en);font-size:clamp(1.6rem,7vw,2.3rem);font-weight:700;line-height:1.2;word-break:break-word}
+.fc-k{font-size:clamp(1.2rem,5.4vw,1.6rem);font-weight:700;line-height:1.35;word-break:keep-all}
+.fc-say{border:1px solid var(--rule);background:var(--paper);border-radius:999px;padding:4px 12px;font-size:.85rem;cursor:pointer;color:var(--ink)}
+.fc-back{flex:1;border-top:1px dashed var(--rule);margin:0 14px;padding:14px 4px 16px;display:grid;gap:8px;align-content:start;text-align:center}
+.fc-cover{flex:1;margin:0 12px 12px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;min-height:110px;border:0;font:inherit;font-weight:700;width:calc(100% - 24px)}
+.fc-ex{font-family:var(--font-en);font-size:.92rem;line-height:1.5;color:var(--ink);text-align:left;background:var(--paper);border-radius:8px;padding:8px 10px}
+.fc-ex mark{background:var(--marker);color:inherit;border-radius:3px;padding:0 2px}
+.fc-exk{font-size:.85rem;color:var(--muted);text-align:left}
+.fc-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.fc-btns .btn{padding:14px 8px;font-size:1.02rem;font-weight:700}
+.fc-no{background:var(--bad-soft);color:var(--bad);border-color:var(--bad-soft)}
+.fc-yes{background:var(--good-soft);color:var(--good);border-color:var(--good-soft)}
+.fc-tip{font-size:.8rem;color:var(--muted);text-align:center;margin-top:8px}
+.fc-done{border:1px solid var(--rule);border-radius:16px;background:var(--sheet);padding:22px 18px;text-align:center;display:grid;gap:12px}
+.fc-done .big{font-size:1.25rem;font-weight:700}
+.fc-stat{display:flex;justify-content:center;gap:18px;font-size:.95rem}
+.fc-stat b{font-size:1.3rem}
+.fc-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.fc-list span{border:1px solid var(--rule);border-radius:999px;padding:2px 10px;font-family:var(--font-en);font-size:.88rem}
+.fcmark{font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+.fcmark.ok{background:var(--good-soft);color:var(--good)}
+.fcmark.no{background:var(--bad-soft);color:var(--bad)}
 .xmsg:empty{display:none}
 .xrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 .xcode{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,monospace;border:1px solid var(--rule);border-radius:8px;padding:8px;word-break:break-all}
@@ -1012,7 +1047,7 @@ function renderWrite(p, b){
 function vocCard(id, it, opts){
   const c = el('div',{class:'mycard'});
   const top = el('div',{class:'trow'});
-  top.appendChild(el('span',{}, `<b class="tw">${esc(it.w)}</b>${it.f && it.f.toLowerCase() !== it.w.toLowerCase() ? ` <span class="srcl">(본문: ${esc(it.f)})</span>` : ''}`));
+  top.appendChild(el('span',{}, `<b class="tw">${esc(it.w)}</b>${it.f && it.f.toLowerCase() !== it.w.toLowerCase() ? ` <span class="srcl">(본문: ${esc(it.f)})</span>` : ''}${it.fc === 1 ? '<span class="fcmark ok">알아요</span>' : it.fc === 0 ? '<span class="fcmark no">몰라요</span>' : ''}`));
   const del = el('button',{class:'btn sm',type:'button'}, '빼기'); del.addEventListener('click', ()=>{ removeVoc(id); render(); });
   top.appendChild(del); c.appendChild(top);
   const mean = el('div',{class:'mm'+(opts.hide?' hid':'')}, esc(it.m || '(뜻 없음 — 수정을 눌러 적어 주세요)'));
@@ -1061,7 +1096,205 @@ function renderVocab(p, b){
   });
   b.appendChild(g);
 }
+// ───── 플래시카드 암기 (클래스카드 암기학습 방식) ─────
+// 한 구간의 카드를 넘기며 알아요/몰라요로 나누고, 다음 라운드에는 몰라요 카드만 다시 나온다. 모두 알면 구간 끝.
+const FC = (() => { let s = {}; try{ s = JSON.parse(localStorage.getItem('mock10-fc') || '{}'); }catch(e){}
+  return {on:false, opt: Object.assign({scope:'all', size:20, only:'all', front:'en', shuffle:true, say:false}, s.opt || {}), sess: null}; })();
+const fcSave = () => { try{ localStorage.setItem('mock10-fc', JSON.stringify({opt: FC.opt})); }catch(e){} };
+const FC_CAN_SAY = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
+function fcSay(word){
+  if(!FC_CAN_SAY) return;
+  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(word); u.lang = 'en-US'; u.rate = .9;
+    const v = speechSynthesis.getVoices().find(v => /^en[-_]US/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^en/i.test(v.lang)); if(v) u.voice = v;
+    speechSynthesis.speak(u); }catch(e){}
+}
+function fcPool(){
+  const order = {}; DATA.forEach((p,i) => order[p.key] = i);
+  return Object.entries(VOC.items)
+    .filter(([id,it]) => FC.opt.scope === 'all' || it.k === FC.opt.scope)
+    .filter(([id,it]) => FC.opt.only === 'all' || it.fc !== 1)
+    .sort((a,b) => (order[a[1].k] - order[b[1].k]) || (a[1].t - b[1].t))
+    .map(([id]) => id);
+}
+function fcSections(pool){ const n = FC.opt.size || pool.length || 1; const out = []; for(let i=0;i<pool.length;i+=n) out.push(pool.slice(i, i+n)); return out; }
+function fcStart(sec){
+  const secs = fcSections(fcPool()); if(!secs.length) return;
+  sec = Math.max(0, Math.min(sec, secs.length - 1));
+  const ids = secs[sec];
+  FC.sess = {sec, secN: secs.length, ids, round:1, queue: FC.opt.shuffle ? shuffle(ids) : ids.slice(), i:0, known:[], unknown:[], open:false, hist:[], done:false};
+}
+function fcAnswer(know){
+  const S = FC.sess; if(!S || S.done) return;
+  const id = S.queue[S.i]; const it = VOC.items[id];
+  S.hist.push({id, prev: it ? it.fc : undefined, know});
+  if(it){ it.fc = know ? 1 : 0; it.fcn = (it.fcn || 0) + 1; it.fct = Date.now(); persistVoc(); }
+  (know ? S.known : S.unknown).push(id);
+  S.i++; S.open = false;
+  if(S.i >= S.queue.length) S.done = true;
+}
+function fcUndo(){
+  const S = FC.sess; if(!S || !S.hist.length) return;
+  const h = S.hist.pop(); const it = VOC.items[h.id];
+  if(it){ if(h.prev === undefined) delete it.fc; else it.fc = h.prev; it.fcn = Math.max(0, (it.fcn || 1) - 1); persistVoc(); }
+  const arr = h.know ? S.known : S.unknown; const k = arr.lastIndexOf(h.id); if(k >= 0) arr.splice(k, 1);
+  S.done = false; S.i = Math.max(0, S.i - 1); S.open = false;
+}
+function fcNextRound(){ const S = FC.sess; S.round++; S.queue = FC.opt.shuffle ? shuffle(S.unknown) : S.unknown.slice(); S.unknown = []; S.i = 0; S.done = false; S.open = false; S.hist = []; }
+const fcMarkEx = (ex, words) => { let h = esc(ex); for(const w of words){ if(!w) continue; const re = new RegExp('(^|[^A-Za-z])(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?=[^A-Za-z]|$)', 'i'); if(re.test(h)){ h = h.replace(re, '$1<mark>$2</mark>'); break; } } return h; };
+
+function renderFlash(m){
+  const top = el('div',{class:'fctop'});
+  const back = el('button',{class:'btn sm',type:'button'}, '← 단어장 목록');
+  back.addEventListener('click', ()=>{ FC.on = false; FC.sess = null; if(FC_CAN_SAY) try{ speechSynthesis.cancel(); }catch(e){} render(); window.scrollTo(0,0); });
+  top.appendChild(back);
+  m.appendChild(el('h2',{class:'mh'}, '플래시카드 암기'));
+  m.appendChild(top);
+  // 본문 암기에서 단어를 누를 때 뜨는 안내가 카드·버튼을 가리지 않게 닫는다
+  const tt = document.getElementById('toast'); if(tt){ clearTimeout(showToast.tm); clearTimeout(showToast.tm2); tt.remove(); }
+  const S = FC.sess;
+  if(!S){ renderFlashSetup(m); return; }
+  top.appendChild(el('span',{class:'grow'}));
+  const reset = el('button',{class:'btn sm',type:'button'}, '설정 바꾸기');
+  reset.addEventListener('click', ()=>{ FC.sess = null; render(); });
+  top.appendChild(reset);
+  // 구간 정보
+  m.appendChild(el('div',{class:'fctop',style:'margin-top:0'}, `<span class="grow"><b>제 ${S.sec+1}구간</b> <span class="srcl">(전체 ${S.secN}구간 · 이 구간 ${S.ids.length}장)</span></span><b>${S.round}라운드</b>`));
+  if(S.done){ renderFlashDone(m, S); return; }
+  const id = S.queue[S.i]; const it = VOC.items[id];
+  if(!it){ S.i++; if(S.i >= S.queue.length) S.done = true; render(); return; }
+  const bar = el('div',{class:'fcbar'}); bar.appendChild(el('i',{style:`width:${Math.round(S.i / S.queue.length * 100)}%`})); m.appendChild(bar);
+  m.appendChild(el('div',{class:'fctop'}, `<span class="grow">${S.i+1} / ${S.queue.length}장</span><span style="color:var(--good)">알아요 ${S.known.length}</span><span style="color:var(--bad)">몰라요 ${S.unknown.length}</span>`));
+
+  const enFirst = FC.opt.front === 'en';
+  const card = el('div',{class:'fc-card',tabindex:'0','aria-label':'플래시카드. 누르면 답이 보입니다.'});
+  const front = el('div',{class:'fc-front'});
+  const pk = it.k.replace('-','~');
+  if(enFirst){
+    front.appendChild(el('div',{class:'fc-w'}, esc(it.w)));
+    if(it.f && it.f.toLowerCase() !== it.w.toLowerCase()) front.appendChild(el('div',{class:'srcl'}, `본문에서는 <span style="font-family:var(--font-en)">${esc(it.f)}</span>`));
+  } else {
+    front.appendChild(el('div',{class:'fc-k'}, esc(it.m || '(뜻 없음)')));
+  }
+  if(FC_CAN_SAY && (enFirst || S.open)){
+    const say = el('button',{class:'fc-say',type:'button','aria-label':'발음 듣기'}, '🔊 발음');
+    say.addEventListener('click', e => { e.stopPropagation(); fcSay(it.w); });
+    front.appendChild(say);
+  }
+  front.appendChild(el('div',{class:'srcl'}, `${esc(pk)}번 지문${it.fcn ? ` · 지금까지 ${it.fcn}번 봤어요` : ''}${it.fc === 1 ? ' · 전에 알아요' : it.fc === 0 ? ' · 전에 몰라요' : ''}`));
+  card.appendChild(front);
+  if(S.open){
+    const b = el('div',{class:'fc-back'});
+    if(enFirst) b.appendChild(el('div',{class:'fc-k'}, esc(it.m || '(뜻 없음 — 단어장 목록에서 뜻 수정을 눌러 적어 주세요)')));
+    else {
+      b.appendChild(el('div',{class:'fc-w'}, esc(it.w)));
+      if(it.f && it.f.toLowerCase() !== it.w.toLowerCase()) b.appendChild(el('div',{class:'srcl'}, `본문에서는 <span style="font-family:var(--font-en)">${esc(it.f)}</span>`));
+    }
+    if(it.ex) b.appendChild(el('div',{class:'fc-ex'}, fcMarkEx(it.ex, [it.f, it.w])));
+    if(it.exk && it.exk !== it.m) b.appendChild(el('div',{class:'fc-exk'}, `끊어 읽기: “${esc(it.exk)}”`));
+    card.appendChild(b);
+  } else {
+    const cov = el('button',{class:'fc-cover',type:'button'}, enFirst ? '뜻을 떠올린 뒤 눌러서 확인' : '영어 단어를 떠올린 뒤 눌러서 확인');
+    card.appendChild(cov);
+  }
+  // 누르기 = 뒤집기, 옆으로 밀기 = 알아요(오른쪽)/몰라요(왼쪽)
+  let sx = null, sy = null, moved = false;
+  card.addEventListener('pointerdown', e => { if(e.target.closest('.fc-say')) return; sx = e.clientX; sy = e.clientY; moved = false; });
+  card.addEventListener('pointermove', e => { if(sx === null) return; const dx = e.clientX - sx; if(Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(e.clientY - sy)){ moved = true; card.style.transform = `translateX(${dx}px) rotate(${dx/30}deg)`; } });
+  const end = e => {
+    if(sx === null) return; const dx = e.clientX - sx; sx = null; card.style.transform = '';
+    if(moved && Math.abs(dx) > 80){ fcGo(dx > 0, card); return; }
+    if(!moved && e.type === 'pointerup' && !e.target.closest('.fc-say')) fcFlip();
+  };
+  card.addEventListener('pointerup', end); card.addEventListener('pointercancel', end);
+  m.appendChild(card);
+  const btns = el('div',{class:'fc-btns'});
+  const no = el('button',{class:'btn fc-no',type:'button'}, '몰라요');
+  const yes = el('button',{class:'btn fc-yes',type:'button'}, '알아요');
+  no.addEventListener('click', ()=> fcGo(false, card)); yes.addEventListener('click', ()=> fcGo(true, card));
+  btns.appendChild(no); btns.appendChild(yes); m.appendChild(btns);
+  const tools = el('div',{class:'fctop',style:'justify-content:center;margin-top:10px'});
+  if(S.hist.length){ const u = el('button',{class:'btn sm',type:'button'}, '↶ 되돌리기'); u.addEventListener('click', ()=>{ fcUndo(); render(); }); tools.appendChild(u); }
+  m.appendChild(tools);
+  m.appendChild(el('p',{class:'fc-tip'}, '카드를 누르면 답이 보여요. 휴대폰은 카드를 오른쪽으로 밀면 알아요, 왼쪽으로 밀면 몰라요. 키보드는 스페이스 = 뒤집기, → 알아요, ← 몰라요.'));
+  if(FC.opt.say && FC_CAN_SAY && S.saidFor !== id + (S.open ? 'o' : 'c') && (enFirst ? !S.open : S.open)){ S.saidFor = id + (S.open ? 'o' : 'c'); setTimeout(()=> fcSay(it.w), 150); }
+}
+function fcFlip(){ const S = FC.sess; if(!S || S.done) return; S.open = !S.open; render(); }
+function fcGo(know, card){
+  const S = FC.sess; if(!S || S.done || S.busy) return;
+  S.busy = true;
+  if(card) card.classList.add(know ? 'out-r' : 'out-l');
+  setTimeout(()=>{ S.busy = false; fcAnswer(know); render(); }, card ? 170 : 0);
+}
+function renderFlashDone(m, S){
+  const d = el('div',{class:'fc-done'});
+  const unk = S.unknown;
+  if(unk.length){
+    d.appendChild(el('div',{class:'big'}, `${S.round}라운드 끝!`));
+    d.appendChild(el('div',{class:'fc-stat'}, `<span style="color:var(--good)">알아요 <b>${S.queue.length - unk.length}</b></span><span style="color:var(--bad)">몰라요 <b>${unk.length}</b></span>`));
+    const l = el('div',{class:'fc-list'}); unk.forEach(id => { const it = VOC.items[id]; if(it) l.appendChild(el('span',{}, esc(it.w))); }); d.appendChild(l);
+    d.appendChild(el('p',{class:'hint',style:'margin:0'}, '한 번에 외우기보다 라운드를 나눠 여러 번 보는 게 더 오래 남아요. 다음엔 답을 먼저 떠올린 뒤 확인해 보세요.'));
+    const again = el('button',{class:'btn primary',type:'button'}, `모르는 카드 다시 학습 (${unk.length})`);
+    again.addEventListener('click', ()=>{ fcNextRound(); render(); window.scrollTo(0,0); });
+    d.appendChild(again);
+  } else {
+    d.appendChild(el('div',{class:'big'}, `🎉 제 ${S.sec+1}구간 ${S.ids.length}장을 다 외웠어요!`));
+    d.appendChild(el('div',{class:'hint',style:'margin:0'}, `${S.round}라운드 만에 끝냈어요.`));
+    const row = el('div',{class:'seg',style:'justify-content:center'});
+    if(S.sec < S.secN - 1){ const nx = el('button',{class:'btn primary',type:'button'}, `다음 구간 (제 ${S.sec+2}구간) →`); nx.addEventListener('click', ()=>{ fcStart(S.sec + 1); render(); window.scrollTo(0,0); }); row.appendChild(nx); }
+    const re = el('button',{class:'btn',type:'button'}, '이 구간 다시'); re.addEventListener('click', ()=>{ fcStart(S.sec); render(); }); row.appendChild(re);
+    const fin = el('button',{class:'btn',type:'button'}, '끝내기'); fin.addEventListener('click', ()=>{ FC.on = false; FC.sess = null; render(); window.scrollTo(0,0); }); row.appendChild(fin);
+    d.appendChild(row);
+  }
+  if(S.hist.length){ const u = el('button',{class:'btn sm',type:'button',style:'justify-self:center'}, '↶ 마지막 카드 되돌리기'); u.addEventListener('click', ()=>{ fcUndo(); render(); }); d.appendChild(u); }
+  m.appendChild(d);
+}
+function renderFlashSetup(m){
+  const box = el('div',{class:'fcset'});
+  const seg = (label, key, opts) => {
+    const w = el('div'); w.appendChild(el('div',{class:'lab'}, label));
+    const r = el('div',{class:'seg'});
+    opts.forEach(([v, t]) => { const b = el('button',{class:'btn'+(FC.opt[key] === v ? ' on' : ''),type:'button','aria-pressed':String(FC.opt[key] === v)}, t); b.addEventListener('click', ()=>{ FC.opt[key] = v; fcSave(); render(); }); r.appendChild(b); });
+    w.appendChild(r); return w;
+  };
+  // 범위: 전체 또는 지문별 (단어가 있는 지문만)
+  const keys = DATA.map(p => p.key).filter(k => Object.values(VOC.items).some(it => it.k === k));
+  if(FC.opt.scope !== 'all' && !keys.includes(FC.opt.scope)) FC.opt.scope = 'all';
+  const sw = el('div'); sw.appendChild(el('div',{class:'lab'}, '범위'));
+  const sel = el('select',{'aria-label':'범위'});
+  sel.appendChild(el('option',{value:'all'}, `내 단어장 전체 (${vocCount()}개)`));
+  keys.forEach(k => { const n = Object.values(VOC.items).filter(it => it.k === k).length; const o = el('option',{value:k}, `${k.replace('-','~')}번 지문 (${n}개)`); sel.appendChild(o); });
+  sel.value = FC.opt.scope; sel.addEventListener('change', ()=>{ FC.opt.scope = sel.value; fcSave(); render(); });
+  sw.appendChild(sel); box.appendChild(sw);
+  box.appendChild(seg('카드', 'only', [['all','전체 카드'],['left','아직 못 외운 카드만']]));
+  box.appendChild(seg('앞면', 'front', [['en','영어 → 뜻'],['ko','뜻 → 영어']]));
+  box.appendChild(seg('구간 크기', 'size', [[10,'10장'],[20,'20장'],[30,'30장'],[0,'한 번에 전부']]));
+  box.appendChild(seg('카드 순서', 'shuffle', [[true,'섞기'],[false,'추가한 순서']]));
+  if(FC_CAN_SAY) box.appendChild(seg('발음 자동 재생', 'say', [[false,'끄기'],[true,'켜기']]));
+  m.appendChild(box);
+  const pool = fcPool(); const secs = fcSections(pool);
+  const all = Object.values(VOC.items).filter(it => FC.opt.scope === 'all' || it.k === FC.opt.scope);
+  const okN = all.filter(it => it.fc === 1).length, noN = all.filter(it => it.fc === 0).length;
+  m.appendChild(el('p',{class:'hint'}, `이 범위 ${all.length}개 중 알아요 ${okN}개 · 몰라요 ${noN}개 · 아직 안 본 카드 ${all.length - okN - noN}개`));
+  if(!pool.length){ m.appendChild(el('div',{class:'gist'}, FC.opt.only === 'left' ? '이 범위의 카드를 모두 외웠어요! ‘전체 카드’로 바꾸면 다시 볼 수 있어요.' : '이 범위에 카드가 없어요.')); return; }
+  const list = el('div',{class:'seg'});
+  secs.forEach((ids, i) => {
+    const b = el('button',{class:'btn'+(i===0?' primary':''),type:'button'}, secs.length === 1 ? `암기 시작 (${ids.length}장)` : `제 ${i+1}구간 시작 (${ids.length}장)`);
+    b.addEventListener('click', ()=>{ fcStart(i); render(); window.scrollTo(0,0); });
+    list.appendChild(b);
+  });
+  m.appendChild(list);
+  m.appendChild(el('p',{class:'fc-tip',style:'text-align:left'}, '알아요/몰라요로 나누면, 다음 라운드에는 몰라요 카드만 다시 나와요. 모두 알아요가 되면 그 구간이 끝나요. 알아요·몰라요 기록은 단어장에 함께 저장돼요.'));
+}
+document.addEventListener('keydown', e => {
+  if(!(st.mode === 'voc' && FC.on && FC.sess && !FC.sess.done)) return;
+  if(e.target.closest && e.target.closest('input,textarea,select')) return;
+  if(e.key === ' ' || e.key === 'Enter'){ if(e.target.closest && e.target.closest('button:not(.fc-cover)')) return; e.preventDefault(); fcFlip(); }
+  else if(e.key === 'ArrowRight'){ e.preventDefault(); fcGo(true, document.querySelector('.fc-card')); }
+  else if(e.key === 'ArrowLeft'){ e.preventDefault(); fcGo(false, document.querySelector('.fc-card')); }
+});
+
 function renderMyVocab(m){
+  if(FC.on){ renderFlash(m); return; }
   m.appendChild(el('h2',{class:'mh'}, '내 단어장'));
   const all = Object.entries(VOC.items);
   m.appendChild(el('p',{class:'hint'}, (VOC.where==='account' ? '내 계정에 저장되어 다른 기기에서도 이어집니다. ' : '지금은 이 브라우저에만 저장됩니다. ') + '본문 암기 탭에서 단어를 누르면 추가됩니다. 뜻을 가리고 떠올려 본 뒤 눌러서 확인하세요.'));
@@ -1071,6 +1304,7 @@ function renderMyVocab(m){
     return;
   }
   const bar = el('div',{class:'toolbar'});
+  bar.appendChild(el('button',{class:'btn primary',onclick:()=>{ FC.on = true; FC.sess = null; render(); window.scrollTo(0,0); }}, '플래시카드로 외우기'));
   bar.appendChild(el('button',{class:'btn'+(st.vocHide?' on':''),onclick:()=>{st.vocHide=!st.vocHide; render();}}, st.vocHide?'뜻 보이기':'뜻 가리고 외우기'));
   bar.appendChild(el('span',{class:'score'}, `${all.length}개`));
   m.appendChild(bar);
