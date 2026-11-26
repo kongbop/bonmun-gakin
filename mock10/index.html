@@ -1232,12 +1232,10 @@ function lvStartTimer(){
   LVR.tick = setInterval(() => { const t = document.getElementById('lv-time'); if(t && LVR) t.textContent = lvFmt(lvSec()); else if(!t && LVR) clearInterval(LVR.tick); }, 500);
 }
 function lvAddMiss(p, idx){
-  const t = LVR.tokens[idx], r = lvRec(p.key);
+  const r = lvRec(p.key);
   if(!Array.isArray(r.miss)) r.miss = [];
   if(!r.miss.includes(idx)){ r.miss.push(idx); r.mt = Date.now(); LVS.change(); }
-  // 뜻이 있는 단어는 내 단어장에도 넣는다 (the·of 같은 기능어는 빼고)
-  const tok = p.il[t.sent] && p.il[t.sent].t[t.gi];
-  if(tok && tok[1]) addVoc(p.key, tok[0], tok[1], tok[2], p.sents[t.sent].en, t.uko, t.core);
+  // 단어장에는 넣지 않는다: 단어장은 본문 암기에서 직접 누른 단어만
 }
 function lvRemoveMiss(p, idx){
   const r = LVS.items[p.key];
@@ -1265,7 +1263,7 @@ function renderLevel(p, b){
   b.appendChild(bar);
   const r = rec[lv];
   b.appendChild(el('p',{class:'hint lvdesc'}, esc(LV_INFO[lv].desc) + (r && r.best != null && lv !== LV_WRITE ? ` <b>최고 기록 ${lvFmt(r.best)}</b>` : '')));
-  b.appendChild(el('p',{class:'hint lvlegend'}, '초록 칸(✓)은 하나도 안 틀리고 완료, 파란 칸(·)은 틀린 채로 완료한 레벨이에요. 틀린 단어는 이 파트의 복습 목록과 내 단어장(뜻이 있는 단어만)에 모여요.'));
+  b.appendChild(el('p',{class:'hint lvlegend'}, '초록 칸(✓)은 하나도 안 틀리고 완료, 파란 칸(·)은 틀린 채로 완료한 레벨이에요. 틀린 단어는 이 파트의 ‘틀린 단어만 복습’ 목록에 모여요(내 단어장에는 들어가지 않아요).'));
   const opt = el('div',{class:'toolbar'});
   if(lv !== LV_WRITE){
     opt.appendChild(el('button',{type:'button',class:'btn' + (LVU.sent ? ' on' : ''),'aria-pressed':String(!!LVU.sent),onclick:()=>{ LVU.sent = !LVU.sent; lvSaveUi(); render(); }}, '한 문장씩'));
